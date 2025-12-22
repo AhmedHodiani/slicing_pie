@@ -126,7 +126,7 @@ export default function ContributionForm({ type, onClose, onSuccess }: Contribut
 
           <div>
             <label className="block text-sm font-medium text-foreground">
-              {type === "time" ? "Hours" : "Amount ($)"}
+              {type === "time" ? "Hours" : "Amount (JOD)"}
             </label>
             <input
               type="number"

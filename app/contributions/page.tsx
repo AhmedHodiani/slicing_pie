@@ -276,7 +276,7 @@ export default function ContributionsPage() {
             </div>
             <div className="bg-card border border-border rounded-lg p-4 shadow-sm">
                 <div className="text-xs text-muted-foreground uppercase font-bold">Total FMV</div>
-                <div className="text-2xl font-bold mt-1">${stats.totalFMV.toLocaleString(undefined, { maximumFractionDigits: 2 })}</div>
+                <div className="text-2xl font-bold mt-1">JOD {stats.totalFMV.toLocaleString(undefined, { maximumFractionDigits: 2 })}</div>
             </div>
             <div className="bg-card border border-border rounded-lg p-4 shadow-sm">
                 <div className="text-xs text-muted-foreground uppercase font-bold">Total Hours</div>
@@ -284,7 +284,7 @@ export default function ContributionsPage() {
             </div>
             <div className="bg-card border border-border rounded-lg p-4 shadow-sm">
                 <div className="text-xs text-muted-foreground uppercase font-bold">Total Cash</div>
-                <div className="text-2xl font-bold mt-1">${stats.totalCash.toLocaleString()}</div>
+                <div className="text-2xl font-bold mt-1">JOD {stats.totalCash.toLocaleString()}</div>
             </div>
             <div className="bg-card border border-border rounded-lg p-4 shadow-sm">
                 <div className="text-xs text-muted-foreground uppercase font-bold">Entries</div>
@@ -379,7 +379,7 @@ export default function ContributionsPage() {
                                             </div>
                                         </td>
                                         <td className="p-3 text-right font-mono">
-                                            {row.category === 'money' ? `$${row.amount.toLocaleString()}` : `${row.amount.toFixed(2)}h`}
+                                            {row.category === 'money' ? `JOD ${row.amount.toLocaleString()}` : `${row.amount.toFixed(2)}h`}
                                         </td>
                                         <td className="p-3 text-right font-mono text-muted-foreground">
                                             x{row.multiplier}

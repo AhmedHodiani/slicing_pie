@@ -358,7 +358,7 @@ export default function ContributionImport({ onClose, onSuccess }: ContributionI
                                         {row.description}
                                     </td>
                                     <td className="p-2 text-right font-mono">{row.hours.toFixed(2)}</td>
-                                    <td className="p-2 text-right font-mono text-muted-foreground">${row.rate}</td>
+                                    <td className="p-2 text-right font-mono text-muted-foreground">JOD {row.rate}</td>
                                     <td className="p-2 text-right font-mono font-bold text-primary">{row.slices.toFixed(2)}</td>
                                     <td className="p-2">
                                         {row.isValid ? (

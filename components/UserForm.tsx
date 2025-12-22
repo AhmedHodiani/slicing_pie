@@ -219,7 +219,7 @@ export default function UserForm({ user, onClose, onSuccess }: UserFormProps) {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-foreground">Monthly Salary ($)</label>
+                <label className="block text-sm font-medium text-foreground">Monthly Salary (JOD)</label>
                 <input
                   type="number"
                   min="0"
@@ -231,7 +231,7 @@ export default function UserForm({ user, onClose, onSuccess }: UserFormProps) {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-foreground">Hourly Rate ($)</label>
+                <label className="block text-sm font-medium text-foreground">Hourly Rate (JOD)</label>
                 <input
                   type="number"
                   min="0"

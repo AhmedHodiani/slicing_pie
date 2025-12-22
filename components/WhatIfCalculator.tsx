@@ -86,7 +86,7 @@ export default function WhatIfCalculator({ currentTotalSlices, currentUserSlices
           </div>
           <div>
             <label className="block text-xs font-medium text-muted-foreground mb-1">
-              {type === "time" ? "Hours" : "Amount ($)"}
+              {type === "time" ? "Hours" : "Amount (JOD)"}
             </label>
             <input
               type="number"
@@ -120,7 +120,7 @@ export default function WhatIfCalculator({ currentTotalSlices, currentUserSlices
           </div>
           
           <p className="text-xs text-muted-foreground mt-2 text-right">
-            Based on your rate of ${hourlyRate}/hr
+            Based on your rate of JOD {hourlyRate}/hr
           </p>
         </div>
       </div>

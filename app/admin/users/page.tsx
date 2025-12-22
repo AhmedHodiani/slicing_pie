@@ -164,10 +164,10 @@ export default function UserManagementPage() {
                     </span>
                   </td>
                   <td className="whitespace-nowrap px-6 py-4 text-sm text-muted-foreground">
-                    ${user.market_salary_monthly?.toLocaleString() || "-"}
+                    JOD {user.market_salary_monthly?.toLocaleString() || "-"}
                   </td>
                   <td className="whitespace-nowrap px-6 py-4 text-sm text-muted-foreground">
-                    ${user.hourly_rate?.toFixed(2) || "-"}
+                    JOD {user.hourly_rate?.toFixed(2) || "-"}
                   </td>
                   <td className="whitespace-nowrap px-6 py-4 text-sm text-muted-foreground">
                     {new Date(user.created).toLocaleDateString()}
