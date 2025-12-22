@@ -34,25 +34,27 @@ export default function VelocityChart({ data }: VelocityChartProps) {
         >
           <defs>
             <linearGradient id="colorSlices" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.3}/>
-              <stop offset="95%" stopColor="var(--primary)" stopOpacity={0}/>
+              <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3}/>
+              <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
             </linearGradient>
           </defs>
-          <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
           <XAxis 
             dataKey="date" 
-            stroke="var(--muted-foreground)" 
+            stroke="hsl(var(--muted-foreground))" 
             fontSize={12}
             tickLine={false}
             axisLine={false}
             minTickGap={30}
+            tick={{ fill: 'hsl(var(--muted-foreground))' }}
           />
           <YAxis 
-            stroke="var(--muted-foreground)" 
+            stroke="hsl(var(--muted-foreground))" 
             fontSize={12}
             tickLine={false}
             axisLine={false}
             tickFormatter={(value) => `${value / 1000}k`}
+            tick={{ fill: 'hsl(var(--muted-foreground))' }}
           />
           <Tooltip
             contentStyle={{ 
@@ -69,7 +71,7 @@ export default function VelocityChart({ data }: VelocityChartProps) {
           <Area 
             type="monotone" 
             dataKey="totalSlices" 
-            stroke="var(--primary)" 
+            stroke="hsl(var(--primary))" 
             fillOpacity={1} 
             fill="url(#colorSlices)" 
             strokeWidth={2}

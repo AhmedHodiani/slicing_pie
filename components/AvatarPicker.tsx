@@ -98,8 +98,8 @@ export default function AvatarPicker({ value, onChange }: AvatarPickerProps) {
               onClick={() => setActiveTab(key as keyof AvatarConfig)}
               className={`px-3 py-1.5 text-xs font-medium whitespace-nowrap rounded-md transition-colors ${
                 activeTab === key 
-                  ? "bg-primary text-primary-foreground" 
-                  : "bg-muted text-muted-foreground hover:bg-muted/80"
+                  ? "bg-primary text-primary-foreground shadow-sm" 
+                  : "bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground"
               }`}
             >
               {key.replace(/([A-Z])/g, ' $1').trim()}
@@ -107,7 +107,7 @@ export default function AvatarPicker({ value, onChange }: AvatarPickerProps) {
           ))}
         </div>
 
-        <div className="grid grid-cols-3 gap-2 max-h-40 overflow-y-auto p-1">
+        <div className="grid grid-cols-3 gap-2 max-h-60 overflow-y-auto p-1">
           {OPTIONS[activeTab].map((opt) => (
             <button
               key={opt}
@@ -115,8 +115,8 @@ export default function AvatarPicker({ value, onChange }: AvatarPickerProps) {
               onClick={() => handleChange(activeTab, opt)}
               className={`px-2 py-1.5 text-xs text-left truncate rounded border transition-colors ${
                 value[activeTab] === opt
-                  ? "border-primary bg-primary/10 text-primary"
-                  : "border-border hover:border-primary/50"
+                  ? "border-primary bg-primary/20 text-primary font-medium shadow-sm"
+                  : "border-border bg-muted/30 text-muted-foreground hover:text-foreground hover:border-primary/50 hover:bg-muted/50"
               }`}
               title={opt}
             >

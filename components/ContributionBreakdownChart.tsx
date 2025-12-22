@@ -36,17 +36,19 @@ export default function ContributionBreakdownChart({ data }: ContributionBreakdo
           <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
           <XAxis 
             dataKey="name" 
-            stroke="var(--muted-foreground)" 
+            stroke="hsl(var(--muted-foreground))" 
             fontSize={12}
             tickLine={false}
             axisLine={false}
+            tick={{ fill: 'hsl(var(--muted-foreground))' }}
           />
           <YAxis 
-            stroke="var(--muted-foreground)" 
+            stroke="hsl(var(--muted-foreground))" 
             fontSize={12}
             tickLine={false}
             axisLine={false}
             tickFormatter={(value) => `${value}`}
+            tick={{ fill: 'hsl(var(--muted-foreground))' }}
           />
           <Tooltip
             cursor={{ fill: 'hsl(var(--muted))', opacity: 0.2 }}

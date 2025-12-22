@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useMemo } from "react";
 import { useAuth } from "@/components/AuthProvider";
+import { useTheme } from "@/components/ThemeProvider";
 import pb from "@/lib/pocketbase";
 import ContributionForm from "@/components/ContributionForm";
 import ContributionImport from "@/components/ContributionImport";
@@ -41,6 +42,7 @@ interface UserWithStats extends RecordModel {
 
 export default function Home() {
   const { user, logout } = useAuth();
+  const { theme, setTheme } = useTheme();
   const router = useRouter();
   const [showTimeModal, setShowTimeModal] = useState(false);
   const [showMoneyModal, setShowMoneyModal] = useState(false);
@@ -382,7 +384,30 @@ export default function Home() {
                     </button>
 
                     {isUserMenuOpen && (
-                    <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-card ring-1 ring-black ring-opacity-5 py-1 z-50 border border-border">
+                    <div className="absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-card ring-1 ring-black ring-opacity-5 py-1 z-50 border border-border">
+                        <div className="px-4 py-2 border-b border-border mb-1">
+                            <p className="text-xs font-medium text-muted-foreground mb-2">Theme</p>
+                            <div className="flex gap-1 bg-muted/50 p-1 rounded-md">
+                                <button 
+                                    onClick={() => setTheme("light")}
+                                    className={`flex-1 px-2 py-1 rounded text-xs font-medium transition-all ${theme === 'light' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                                >
+                                    Light
+                                </button>
+                                <button 
+                                    onClick={() => setTheme("dark")}
+                                    className={`flex-1 px-2 py-1 rounded text-xs font-medium transition-all ${theme === 'dark' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                                >
+                                    Dark
+                                </button>
+                                <button 
+                                    onClick={() => setTheme("system")}
+                                    className={`flex-1 px-2 py-1 rounded text-xs font-medium transition-all ${theme === 'system' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                                >
+                                    Auto
+                                </button>
+                            </div>
+                        </div>
                         <button
                         onClick={logout}
                         className="block w-full text-left px-4 py-2 text-sm text-destructive hover:bg-muted transition-colors"
@@ -427,13 +452,13 @@ export default function Home() {
                             {selectedUser.title && <p className="text-lg text-muted-foreground">{selectedUser.title}</p>}
                             <div className="flex gap-4 mt-2">
                                 <div className="text-sm">
-                                    <span className="text-muted-foreground">Role:</span> <span className="font-medium capitalize">{selectedUser.role}</span>
+                                    <span className="text-muted-foreground">Role:</span> <span className="font-medium capitalize text-foreground">{selectedUser.role}</span>
                                 </div>
                                 <div className="text-sm">
-                                    <span className="text-muted-foreground">Rate:</span> <span className="font-medium">JOD {selectedUser.hourly_rate?.toFixed(2) || "-"}</span>
+                                    <span className="text-muted-foreground">Rate:</span> <span className="font-medium text-foreground">JOD {selectedUser.hourly_rate?.toFixed(2) || "-"}</span>
                                 </div>
                                 <div className="text-sm">
-                                    <span className="text-muted-foreground">Email:</span> <span className="font-medium">{selectedUser.email}</span>
+                                    <span className="text-muted-foreground">Email:</span> <span className="font-medium text-foreground">{selectedUser.email}</span>
                                 </div>
                             </div>
                         </div>

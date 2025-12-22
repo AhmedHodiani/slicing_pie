@@ -266,7 +266,7 @@ export default function ContributionImport({ onClose, onSuccess }: ContributionI
                 <div className="grid grid-cols-4 gap-4 text-sm">
                     <div className="rounded bg-muted p-3">
                         <div className="text-xs text-muted-foreground uppercase font-bold">Total Hours</div>
-                        <div className="text-xl font-bold">
+                        <div className="text-xl font-bold text-foreground">
                             {parsedRows.filter(r => r.isValid).reduce((acc, r) => acc + r.hours, 0).toFixed(2)}
                         </div>
                     </div>
@@ -284,7 +284,7 @@ export default function ContributionImport({ onClose, onSuccess }: ContributionI
                     </div>
                     <div className="rounded bg-muted p-3">
                         <div className="text-xs text-muted-foreground uppercase font-bold">Unique Users</div>
-                        <div className="text-xl font-bold">
+                        <div className="text-xl font-bold text-foreground">
                             {new Set(parsedRows.map(r => r.user?.id).filter(Boolean)).size}
                         </div>
                     </div>
@@ -296,7 +296,7 @@ export default function ContributionImport({ onClose, onSuccess }: ContributionI
                     <select 
                         value={filterUser}
                         onChange={(e) => setFilterUser(e.target.value)}
-                        className="bg-background border border-input rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                        className="bg-background border border-input rounded px-2 py-1 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
                     >
                         <option value="ALL">All Users</option>
                         {Array.from(new Set(parsedRows.map(r => r.user?.name || r.userRaw).filter(Boolean))).sort().map(name => (
@@ -306,16 +306,16 @@ export default function ContributionImport({ onClose, onSuccess }: ContributionI
                 </div>
 
                 <div className="max-h-[60vh] overflow-y-auto rounded border border-border">
-                    <table className="w-full text-left text-sm">
+                    <table className="w-full text-left text-sm text-foreground">
                         <thead className="bg-muted sticky top-0 z-10">
                             <tr>
-                                <th className="p-2 font-medium">Date</th>
-                                <th className="p-2 font-medium">User</th>
-                                <th className="p-2 font-medium">Description</th>
-                                <th className="p-2 font-medium text-right">Hours</th>
-                                <th className="p-2 font-medium text-right">Rate</th>
-                                <th className="p-2 font-medium text-right">Slices</th>
-                                <th className="p-2 font-medium">Status</th>
+                                <th className="p-2 font-medium text-muted-foreground">Date</th>
+                                <th className="p-2 font-medium text-muted-foreground">User</th>
+                                <th className="p-2 font-medium text-muted-foreground">Description</th>
+                                <th className="p-2 font-medium text-muted-foreground text-right">Hours</th>
+                                <th className="p-2 font-medium text-muted-foreground text-right">Rate</th>
+                                <th className="p-2 font-medium text-muted-foreground text-right">Slices</th>
+                                <th className="p-2 font-medium text-muted-foreground">Status</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-border">

@@ -211,7 +211,7 @@ export default function ContributionsPage() {
                         placeholder="Search description or user..." 
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full bg-background border border-input rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                        className="w-full bg-background border border-input rounded px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
                     />
                 </div>
 
@@ -221,7 +221,7 @@ export default function ContributionsPage() {
                     <select 
                         value={selectedUser}
                         onChange={(e) => setSelectedUser(e.target.value)}
-                        className="w-full bg-background border border-input rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                        className="w-full bg-background border border-input rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
                     >
                         <option value="ALL">All Users</option>
                         {users.map(u => (
@@ -236,7 +236,7 @@ export default function ContributionsPage() {
                     <select 
                         value={selectedCategory}
                         onChange={(e) => setSelectedCategory(e.target.value)}
-                        className="w-full bg-background border border-input rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                        className="w-full bg-background border border-input rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
                     >
                         <option value="ALL">All Categories</option>
                         <option value="time">Time</option>
@@ -252,7 +252,7 @@ export default function ContributionsPage() {
                             type="date" 
                             value={dateRange.start}
                             onChange={(e) => setDateRange(prev => ({ ...prev, start: e.target.value }))}
-                            className="bg-background border border-input rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                            className="bg-background border border-input rounded px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
                         />
                     </div>
                     <div>
@@ -261,7 +261,7 @@ export default function ContributionsPage() {
                             type="date" 
                             value={dateRange.end}
                             onChange={(e) => setDateRange(prev => ({ ...prev, end: e.target.value }))}
-                            className="bg-background border border-input rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                            className="bg-background border border-input rounded px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
                         />
                     </div>
                 </div>
@@ -276,19 +276,19 @@ export default function ContributionsPage() {
             </div>
             <div className="bg-card border border-border rounded-lg p-4 shadow-sm">
                 <div className="text-xs text-muted-foreground uppercase font-bold">Total FMV</div>
-                <div className="text-2xl font-bold mt-1">JOD {stats.totalFMV.toLocaleString(undefined, { maximumFractionDigits: 2 })}</div>
+                <div className="text-2xl font-bold mt-1 text-foreground">JOD {stats.totalFMV.toLocaleString(undefined, { maximumFractionDigits: 2 })}</div>
             </div>
             <div className="bg-card border border-border rounded-lg p-4 shadow-sm">
                 <div className="text-xs text-muted-foreground uppercase font-bold">Total Hours</div>
-                <div className="text-2xl font-bold mt-1">{stats.totalHours.toFixed(2)}</div>
+                <div className="text-2xl font-bold mt-1 text-foreground">{stats.totalHours.toFixed(2)}</div>
             </div>
             <div className="bg-card border border-border rounded-lg p-4 shadow-sm">
                 <div className="text-xs text-muted-foreground uppercase font-bold">Total Cash</div>
-                <div className="text-2xl font-bold mt-1">JOD {stats.totalCash.toLocaleString()}</div>
+                <div className="text-2xl font-bold mt-1 text-foreground">JOD {stats.totalCash.toLocaleString()}</div>
             </div>
             <div className="bg-card border border-border rounded-lg p-4 shadow-sm">
                 <div className="text-xs text-muted-foreground uppercase font-bold">Entries</div>
-                <div className="text-2xl font-bold mt-1">{stats.count}</div>
+                <div className="text-2xl font-bold mt-1 text-foreground">{stats.count}</div>
             </div>
         </div>
 
@@ -300,31 +300,31 @@ export default function ContributionsPage() {
             {/* Right Column: Table */}
             <div className="lg:col-span-3 bg-card border border-border rounded-lg shadow-sm overflow-hidden flex flex-col">
                 <div className="overflow-x-auto">
-                    <table className="w-full text-left text-sm">
+                    <table className="w-full text-left text-sm text-foreground">
                         <thead className="bg-muted border-b border-border">
                             <tr>
                                 <th 
-                                    className="p-3 font-medium cursor-pointer hover:bg-muted/80 transition-colors"
+                                    className="p-3 font-medium text-muted-foreground cursor-pointer hover:bg-muted/80 transition-colors"
                                     onClick={() => handleSort('date')}
                                 >
                                     Date {sortConfig.key === 'date' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
                                 </th>
                                 <th 
-                                    className="p-3 font-medium cursor-pointer hover:bg-muted/80 transition-colors"
+                                    className="p-3 font-medium text-muted-foreground cursor-pointer hover:bg-muted/80 transition-colors"
                                     onClick={() => handleSort('userName')}
                                 >
                                     User {sortConfig.key === 'userName' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
                                 </th>
-                                <th className="p-3 font-medium">Description</th>
+                                <th className="p-3 font-medium text-muted-foreground">Description</th>
                                 <th 
-                                    className="p-3 font-medium text-right cursor-pointer hover:bg-muted/80 transition-colors"
+                                    className="p-3 font-medium text-muted-foreground text-right cursor-pointer hover:bg-muted/80 transition-colors"
                                     onClick={() => handleSort('amount')}
                                 >
                                     Amount {sortConfig.key === 'amount' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
                                 </th>
-                                <th className="p-3 font-medium text-right">Mult.</th>
+                                <th className="p-3 font-medium text-muted-foreground text-right">Mult.</th>
                                 <th 
-                                    className="p-3 font-medium text-right cursor-pointer hover:bg-muted/80 transition-colors"
+                                    className="p-3 font-medium text-muted-foreground text-right cursor-pointer hover:bg-muted/80 transition-colors"
                                     onClick={() => handleSort('slices')}
                                 >
                                     Slices {sortConfig.key === 'slices' && (sortConfig.direction === 'asc' ? '↑' : '↓')}

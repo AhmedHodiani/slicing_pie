@@ -93,7 +93,7 @@ export default function WhatIfCalculator({ currentTotalSlices, currentUserSlices
               min="0"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
-              className="block w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+              className="block w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
               placeholder={type === "time" ? "e.g. 40" : "e.g. 1000"}
             />
           </div>
