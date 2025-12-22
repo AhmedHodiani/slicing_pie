@@ -137,14 +137,20 @@ export default function Home() {
   const velocityData = useMemo(() => {
     // Calculate velocity based on filtered contributions
     // Sort by date ascending for chart
-    const sorted = [...filteredContributions].sort((a, b) => new Date(a.created).getTime() - new Date(b.created).getTime());
+    const sorted = [...filteredContributions].sort((a, b) => {
+        const dateA = new Date(a.date || a.created).getTime();
+        const dateB = new Date(b.date || b.created).getTime();
+        return dateA - dateB;
+    });
     
     const points: { date: string; totalSlices: number }[] = [];
     let runningTotal = 0;
 
     sorted.forEach(c => {
         runningTotal += c.slices;
-        const date = new Date(c.created).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+        // Use date field if available, fallback to created
+        const dateObj = new Date(c.date || c.created);
+        const date = dateObj.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
         
         const lastPoint = points[points.length - 1];
         if (lastPoint && lastPoint.date === date) {
