@@ -11,6 +11,7 @@ import ActivityFeed from "@/components/ActivityFeed";
 import ContributionBreakdownChart from "@/components/ContributionBreakdownChart";
 import VelocityChart from "@/components/VelocityChart";
 import WhatIfCalculator from "@/components/WhatIfCalculator";
+import GithubContributionGraph from "@/components/GithubContributionGraph";
 import { useRouter } from "next/navigation";
 import { RecordModel } from "pocketbase";
 
@@ -21,6 +22,7 @@ interface Contribution extends RecordModel {
   slices: number;
   multiplier: number;
   created: string;
+  date?: string;
   expand?: {
     user: {
       id: string;
@@ -217,6 +219,49 @@ export default function Home() {
         }];
     }
   }, [contributions, filteredContributions, selectedUserId, users]);
+
+  const contributionGraphData = useMemo(() => {
+    const dataToProcess = selectedUserId === "ALL" ? contributions : filteredContributions;
+    
+    const dailyMap = new Map<string, number>();
+    let maxSlices = 0;
+    
+    dataToProcess.forEach(c => {
+        // Use the explicit contribution date if available, otherwise fallback to created date
+        // Use local date string (YYYY-MM-DD) to avoid timezone shifts
+        const dateStr = c.date || c.created;
+        const date = new Date(dateStr).toLocaleDateString('en-CA');
+        const current = dailyMap.get(date) || 0;
+        const newVal = current + c.slices;
+        dailyMap.set(date, newVal);
+        if (newVal > maxSlices) maxSlices = newVal;
+    });
+
+    const result: { [year: string]: { date: string; done: number; value: number }[] } = {};
+
+    dailyMap.forEach((slices, date) => {
+        const year = date.split('-')[0];
+        if (!result[year]) {
+            result[year] = [];
+        }
+        
+        // Normalize to 0-10 scale
+        // If slices > 0, ensure at least 1
+        let normalized = 0;
+        if (maxSlices > 0 && slices > 0) {
+            normalized = Math.ceil((slices / maxSlices) * 8);
+        }
+
+        result[year].push({ date, done: normalized, value: slices });
+    });
+
+    // Sort data by date ascending for each year
+    Object.keys(result).forEach(year => {
+        result[year].sort((a, b) => a.date.localeCompare(b.date));
+    });
+
+    return result;
+  }, [contributions, filteredContributions, selectedUserId]);
 
   if (!user) {
     return null; // AuthProvider handles redirect
@@ -458,49 +503,73 @@ export default function Home() {
 
         {/* Main Scrollable Area */}
         <main className="flex-1 overflow-y-auto p-4 sm:p-8 space-y-8">
-            {/* User Info Card */}
-            {selectedUserId !== "ALL" && (() => {
+            {/* User Info Card & Graph */}
+            {selectedUserId !== "ALL" ? (() => {
                 const selectedUser = users.find(u => u.id === selectedUserId);
                 if (!selectedUser) return null;
                 return (
-                    <div className="rounded-lg border border-border bg-card p-6 shadow-card flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left">
-                        <div className="w-30 h-30 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center">
-                            {selectedUser.avatar_options ? (
-                                <Avatar
-                                    style={{ width: '100%', height: '100%' }}
-                                    avatarStyle="Circle"
-                                    {...selectedUser.avatar_options}
-                                />
-                            ) : selectedUser.avatar ? (
-                                <img
-                                    src={pb.files.getUrl(selectedUser, selectedUser.avatar)}
-                                    alt={selectedUser.name}
-                                    className="h-full w-full object-cover"
-                                />
-                            ) : (
-                                <div className="text-2xl font-bold text-muted-foreground">
-                                    {selectedUser.name?.charAt(0).toUpperCase() || "?"}
-                                </div>
-                            )}
-                        </div>
-                        <div className="flex-1">
-                            <h2 className="text-2xl font-bold text-foreground">{selectedUser.name}</h2>
-                            {selectedUser.title && <p className="text-lg text-muted-foreground">{selectedUser.title}</p>}
-                            <div className="flex flex-wrap justify-center sm:justify-start gap-x-6 gap-y-2 mt-2">
-                                <div className="text-sm">
-                                    <span className="text-muted-foreground">Role:</span> <span className="font-medium capitalize text-foreground">{selectedUser.role}</span>
-                                </div>
-                                <div className="text-sm">
-                                    <span className="text-muted-foreground">Rate:</span> <span className="font-medium text-foreground">JOD {selectedUser.hourly_rate?.toFixed(2) || "-"}</span>
-                                </div>
-                                <div className="text-sm">
-                                    <span className="text-muted-foreground">Email:</span> <span className="font-medium text-foreground">{selectedUser.email}</span>
+                    <div className="rounded-lg border border-border bg-card p-6 shadow-card flex flex-col xl:flex-row items-center gap-8">
+                        <div className="flex flex-col sm:flex-row items-center gap-4 flex-shrink-0 xl:max-w-md">
+                            <div className="w-30 h-32 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center">
+                                {selectedUser.avatar_options ? (
+                                    <Avatar
+                                        style={{ width: '100%', height: '100%' }}
+                                        avatarStyle="Circle"
+                                        {...selectedUser.avatar_options}
+                                    />
+                                ) : selectedUser.avatar ? (
+                                    <img
+                                        src={pb.files.getUrl(selectedUser, selectedUser.avatar)}
+                                        alt={selectedUser.name}
+                                        className="h-full w-full object-cover"
+                                    />
+                                ) : (
+                                    <div className="text-2xl font-bold text-muted-foreground">
+                                        {selectedUser.name?.charAt(0).toUpperCase() || "?"}
+                                    </div>
+                                )}
+                            </div>
+                            <div className="text-center sm:text-left">
+                                <h2 className="text-2xl font-bold text-foreground">{selectedUser.name}</h2>
+                                {selectedUser.title && <p className="text-base text-muted-foreground">{selectedUser.title}</p>}
+                                <div className="flex flex-wrap justify-center sm:justify-start gap-x-4 gap-y-1 mt-2 text-sm">
+                                    <div>
+                                        <span className="text-muted-foreground">Role:</span> <span className="font-medium capitalize text-foreground">{selectedUser.role}</span>
+                                    </div>
+                                    <div>
+                                        <span className="text-muted-foreground">Rate:</span> <span className="font-medium text-foreground">JOD {selectedUser.hourly_rate?.toFixed(2) || "-"}</span>
+                                    </div>
+                                    <div className="w-full sm:w-auto">
+                                        <span className="text-muted-foreground">Email:</span> <span className="font-medium text-foreground">{selectedUser.email}</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
+                        
+                        <div className="flex-1 w-full min-w-0 border-t xl:border-t-0 xl:border-l border-border pt-6 xl:pt-0 xl:pl-8">
+                            <div className="flex items-center justify-between mb-2">
+                                <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Contribution Activity</h2>
+                            </div>
+                            {Object.keys(contributionGraphData).length > 0 ? (
+                                <GithubContributionGraph 
+                                    key={selectedUserId} 
+                                    id={`graph-${selectedUserId}`}
+                                    data={contributionGraphData} 
+                                />
+                            ) : (
+                                <div className="w-full h-32 flex items-center justify-center border border-dashed border-border rounded-md bg-muted/20">
+                                    <span className="text-muted-foreground font-medium">0 Slices</span>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 );
-            })()}
+            })() : (
+                <div className="rounded-lg border border-border bg-card pt-7 pb-2 px-10 shadow-card">
+                    <h2 className="text-lg font-semibold text-foreground mb-4">Team Contribution Activity</h2>
+                    <GithubContributionGraph data={contributionGraphData} />
+                </div>
+            )}
 
             {/* Top Stats Row */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">

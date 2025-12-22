@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "github-contribution-graph": "^2.0.3",
     "lodash": "^4.17.21",
     "next": "16.1.0",
     "pocketbase": "^0.26.5",

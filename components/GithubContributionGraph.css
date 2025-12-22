@@ -1,0 +1,12 @@
+.github-contribution-graph-tooltip {
+  display: none !important;
+}
+
+.github-contribution-graph-wrapper rect {
+  cursor: pointer;
+}
+
+.github-contribution-graph-wrapper svg {
+  width: 100% !important;
+  height: auto !important;
+}
