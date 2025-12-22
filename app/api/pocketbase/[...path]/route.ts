@@ -1,5 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+// Simple in-memory rate limiter
+const rateLimit = new Map<string, { count: number; lastReset: number }>();
+const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
+const MAX_REQUESTS = 300; // 300 requests per minute per IP (generous for app usage)
+
+function checkRateLimit(ip: string) {
+  const now = Date.now();
+  const record = rateLimit.get(ip) || { count: 0, lastReset: now };
+
+  if (now - record.lastReset > RATE_LIMIT_WINDOW) {
+    record.count = 0;
+    record.lastReset = now;
+  }
+
+  if (record.count >= MAX_REQUESTS) {
+    return false;
+  }
+
+  record.count++;
+  rateLimit.set(ip, record);
+  return true;
+}
+
 export async function GET(request: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {
   return proxy(request, await params);
 }
@@ -21,6 +44,12 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
 }
 
 async function proxy(request: NextRequest, params: { path: string[] }) {
+  // Rate Limit Check
+  const ip = request.headers.get('x-forwarded-for') || 'unknown';
+  if (!checkRateLimit(ip)) {
+    return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+  }
+
   const pathString = params.path.join('/');
   const searchParams = request.nextUrl.search;
   const targetUrl = `${process.env.POCKETBASE_URL || 'http://127.0.0.1:8090'}/${pathString}${searchParams}`;
