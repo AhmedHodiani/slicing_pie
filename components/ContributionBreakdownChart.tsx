@@ -49,9 +49,16 @@ export default function ContributionBreakdownChart({ data }: ContributionBreakdo
             tickFormatter={(value) => `${value}`}
           />
           <Tooltip
-            cursor={{ fill: 'var(--muted)', opacity: 0.2 }}
-            contentStyle={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
-            itemStyle={{ color: 'var(--foreground)' }}
+            cursor={{ fill: 'hsl(var(--muted))', opacity: 0.2 }}
+            contentStyle={{ 
+              backgroundColor: 'hsl(var(--card))', 
+              borderColor: 'hsl(var(--border))', 
+              color: 'hsl(var(--foreground))',
+              borderRadius: 'var(--radius)',
+              boxShadow: 'var(--shadow-card)',
+              padding: '8px 12px'
+            }}
+            itemStyle={{ color: 'hsl(var(--foreground))' }}
           />
           <Legend />
           <Bar dataKey="Time" stackId="a" fill="#4f772d" radius={[0, 0, 4, 4]} />

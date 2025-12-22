@@ -55,9 +55,16 @@ export default function VelocityChart({ data }: VelocityChartProps) {
             tickFormatter={(value) => `${value / 1000}k`}
           />
           <Tooltip
-            contentStyle={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
-            itemStyle={{ color: 'var(--primary)' }}
-            labelStyle={{ color: 'var(--muted-foreground)' }}
+            contentStyle={{ 
+              backgroundColor: 'hsl(var(--card))', 
+              borderColor: 'hsl(var(--border))', 
+              color: 'hsl(var(--foreground))',
+              borderRadius: 'var(--radius)',
+              boxShadow: 'var(--shadow-card)',
+              padding: '8px 12px'
+            }}
+            itemStyle={{ color: 'hsl(var(--primary))' }}
+            labelStyle={{ color: 'hsl(var(--muted-foreground))' }}
           />
           <Area 
             type="monotone" 

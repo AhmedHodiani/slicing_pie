@@ -41,8 +41,15 @@ export default function EquityPieChart({ data }: PieChartProps) {
             ))}
           </Pie>
           <Tooltip 
-            contentStyle={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
-            itemStyle={{ color: 'var(--foreground)' }}
+            contentStyle={{ 
+              backgroundColor: 'hsl(var(--card))', 
+              borderColor: 'hsl(var(--border))', 
+              color: 'hsl(var(--foreground))',
+              borderRadius: 'var(--radius)',
+              boxShadow: 'var(--shadow-card)',
+              padding: '8px 12px'
+            }}
+            itemStyle={{ color: 'hsl(var(--foreground))' }}
           />
           <Legend />
         </PieChart>
