@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
 import pb from "@/lib/pocketbase";
 import ContributionForm from "@/components/ContributionForm";
+import ContributionImport from "@/components/ContributionImport";
 import EquityPieChart from "@/components/PieChart";
 import TeamGrid from "@/components/TeamGrid";
 import ActivityFeed from "@/components/ActivityFeed";
@@ -44,6 +45,7 @@ export default function Home() {
   const router = useRouter();
   const [showTimeModal, setShowTimeModal] = useState(false);
   const [showMoneyModal, setShowMoneyModal] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
   const [contributions, setContributions] = useState<Contribution[]>([]);
   const [usersWithStats, setUsersWithStats] = useState<UserWithStats[]>([]);
   const [stats, setStats] = useState({
@@ -205,6 +207,12 @@ export default function Home() {
                 </button>
               )}
               <button
+                onClick={() => router.push("/contributions")}
+                className="text-sm font-medium text-foreground hover:text-primary transition-colors"
+              >
+                Contributions
+              </button>
+              <button
                 onClick={logout}
                 className="text-sm font-medium text-destructive hover:text-destructive/80 transition-colors"
               >
@@ -278,6 +286,12 @@ export default function Home() {
                 >
                   + Add Money
                 </button>
+                <button 
+                  onClick={() => setShowImportModal(true)}
+                  className="rounded bg-muted px-4 py-2 text-sm font-medium text-foreground hover:bg-muted/80 transition-smooth shadow-sm"
+                >
+                  Import CSV
+                </button>
               </div>
             )}
           </div>
@@ -285,7 +299,17 @@ export default function Home() {
         </div>
 
         {/* Recent Activity */}
-        <ActivityFeed contributions={contributions} />
+        <ActivityFeed 
+          contributions={contributions} 
+          headerAction={
+            <button 
+              onClick={() => router.push("/contributions")}
+              className="text-sm text-primary hover:underline"
+            >
+              View Full Ledger →
+            </button>
+          }
+        />
 
       </main>
 
@@ -301,6 +325,13 @@ export default function Home() {
         <ContributionForm
           type="money"
           onClose={() => setShowMoneyModal(false)}
+          onSuccess={fetchData}
+        />
+      )}
+
+      {showImportModal && (
+        <ContributionImport
+          onClose={() => setShowImportModal(false)}
           onSuccess={fetchData}
         />
       )}

@@ -18,16 +18,18 @@ interface Contribution extends RecordModel {
 
 interface ActivityFeedProps {
   contributions: Contribution[];
+  headerAction?: React.ReactNode;
 }
 
-export default function ActivityFeed({ contributions }: ActivityFeedProps) {
+export default function ActivityFeed({ contributions, headerAction }: ActivityFeedProps) {
   // Take only the last 10 items
   const recent = contributions.slice(0, 10);
 
   return (
     <div className="rounded-lg border border-border bg-card shadow-card">
-      <div className="p-6 border-b border-border">
+      <div className="p-6 border-b border-border flex justify-between items-center">
         <h2 className="text-lg font-semibold text-foreground">Recent Activity</h2>
+        {headerAction}
       </div>
       <div className="divide-y divide-border">
         {recent.map((c) => {
