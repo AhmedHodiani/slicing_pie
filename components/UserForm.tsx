@@ -109,7 +109,7 @@ export default function UserForm({ user, onClose, onSuccess }: UserFormProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
       <div className="w-full max-w-2xl rounded-lg border border-border bg-card p-6 shadow-elegant max-h-[90vh] overflow-y-auto">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-xl font-bold text-foreground">{isEdit ? "Edit User" : "Create User"}</h2>

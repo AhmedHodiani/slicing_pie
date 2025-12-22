@@ -105,9 +105,10 @@ export default function UserManagementPage() {
       </header>
 
       <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-        <div className="overflow-hidden rounded-lg border border-border bg-card shadow-elegant">
-          <table className="min-w-full divide-y divide-border">
-            <thead className="bg-muted/50">
+        <div className="rounded-lg border border-border bg-card shadow-elegant overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-border">
+              <thead className="bg-muted/50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
                   User
@@ -203,6 +204,7 @@ export default function UserManagementPage() {
               )}
             </tbody>
           </table>
+          </div>
         </div>
       </main>
 

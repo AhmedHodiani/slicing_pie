@@ -48,6 +48,7 @@ export default function Home() {
   const [showMoneyModal, setShowMoneyModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   
   // Data State
   const [contributions, setContributions] = useState<Contribution[]>([]);
@@ -223,12 +224,30 @@ export default function Home() {
 
   return (
     <div className="flex h-screen bg-background overflow-hidden">
+      {/* Mobile Sidebar Overlay */}
+      {isSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
       {/* Left Sidebar - Team */}
-      <aside className="w-80 flex-shrink-0 border-r border-border bg-card flex flex-col">
-        <div className="px-6 py-[17.5px] border-b border-border">
+      <aside className={`
+        fixed inset-y-0 left-0 z-50 w-80 bg-card border-r border-border flex flex-col transition-transform duration-300 ease-in-out
+        lg:static lg:translate-x-0
+        ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}
+      `}>
+        <div className="px-6 py-[17.5px] border-b border-border flex justify-between items-center">
             <div className="flex items-center gap-2">
                 <h1 className="text-xl font-bold text-foreground tracking-tight">Smart Gov Project 201</h1>
             </div>
+            <button 
+              onClick={() => setIsSidebarOpen(false)}
+              className="lg:hidden text-muted-foreground hover:text-foreground"
+            >
+              ✕
+            </button>
         </div>
         
         <div className="flex-1 overflow-y-auto p-4 space-y-2">
@@ -311,44 +330,63 @@ export default function Home() {
       </aside>
 
       {/* Right Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden w-full">
         {/* Header */}
-        <header className="h-16 border-b border-border bg-card flex items-center justify-between px-8 flex-shrink-0">
-            <h2 className="text-lg font-semibold text-foreground">
-                {selectedUserId === "ALL" ? "Team Dashboard" : (users.find(u => u.id === selectedUserId)?.name || "User Dashboard")}
-            </h2>
+        <header className="h-16 border-b border-border bg-card flex items-center justify-between px-4 sm:px-8 flex-shrink-0 gap-4">
+            <div className="flex items-center gap-4 overflow-hidden">
+                <button
+                    onClick={() => setIsSidebarOpen(true)}
+                    className="lg:hidden text-muted-foreground hover:text-foreground flex-shrink-0"
+                >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                </button>
+                <h2 className="text-lg font-semibold text-foreground truncate">
+                    {selectedUserId === "ALL" ? "Team Dashboard" : (users.find(u => u.id === selectedUserId)?.name || "User Dashboard")}
+                </h2>
+            </div>
             
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 sm:gap-4">
                 {user.role === "admin" && (
                     <div className="flex gap-2">
                         <button 
                         onClick={() => setShowTimeModal(true)}
-                        className="rounded bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-smooth shadow-sm"
+                        className="rounded bg-primary px-2 sm:px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-smooth shadow-sm whitespace-nowrap"
                         >
-                        + Time
+                        + <span className="hidden sm:inline">Time</span>
                         </button>
                         <button 
                         onClick={() => setShowMoneyModal(true)}
-                        className="rounded bg-secondary px-3 py-1.5 text-sm font-medium text-secondary-foreground hover:bg-secondary/80 transition-smooth shadow-sm"
+                        className="rounded bg-secondary px-2 sm:px-3 py-1.5 text-sm font-medium text-secondary-foreground hover:bg-secondary/80 transition-smooth shadow-sm whitespace-nowrap"
                         >
-                        + Money
+                        + <span className="hidden sm:inline">Money</span>
                         </button>
                         <button 
                         onClick={() => setShowImportModal(true)}
-                        className="rounded bg-muted px-3 py-1.5 text-sm font-medium text-foreground hover:bg-muted/80 transition-smooth shadow-sm"
+                        className="rounded bg-muted px-2 sm:px-3 py-1.5 text-sm font-medium text-foreground hover:bg-muted/80 transition-smooth shadow-sm whitespace-nowrap"
                         >
-                        Import
+                        <span className="hidden sm:inline">Import</span><span className="sm:hidden">Imp</span>
                         </button>
                     </div>
                 )}
 
-                {user.role === "admin" && <div className="h-6 w-px bg-border mx-2"></div>}
+                {user.role === "admin" && <div className="h-6 w-px bg-border mx-1 sm:mx-2"></div>}
 
                 <button
                     onClick={() => router.push("/contributions")}
-                    className="text-sm font-medium text-foreground hover:text-primary transition-colors"
+                    className="text-sm font-medium text-foreground hover:text-primary transition-colors hidden sm:block"
                 >
                     Ledger
+                </button>
+                <button
+                    onClick={() => router.push("/contributions")}
+                    className="text-foreground hover:text-primary transition-colors sm:hidden"
+                    title="Ledger"
+                >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
                 </button>
 
                 <div className="relative">
@@ -419,13 +457,13 @@ export default function Home() {
         </header>
 
         {/* Main Scrollable Area */}
-        <main className="flex-1 overflow-y-auto p-8 space-y-8">
+        <main className="flex-1 overflow-y-auto p-4 sm:p-8 space-y-8">
             {/* User Info Card */}
             {selectedUserId !== "ALL" && (() => {
                 const selectedUser = users.find(u => u.id === selectedUserId);
                 if (!selectedUser) return null;
                 return (
-                    <div className="rounded-lg border border-border bg-card p-6 shadow-card flex items-center gap-4">
+                    <div className="rounded-lg border border-border bg-card p-6 shadow-card flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left">
                         <div className="w-30 h-30 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center">
                             {selectedUser.avatar_options ? (
                                 <Avatar
@@ -448,7 +486,7 @@ export default function Home() {
                         <div className="flex-1">
                             <h2 className="text-2xl font-bold text-foreground">{selectedUser.name}</h2>
                             {selectedUser.title && <p className="text-lg text-muted-foreground">{selectedUser.title}</p>}
-                            <div className="flex gap-4 mt-2">
+                            <div className="flex flex-wrap justify-center sm:justify-start gap-x-6 gap-y-2 mt-2">
                                 <div className="text-sm">
                                     <span className="text-muted-foreground">Role:</span> <span className="font-medium capitalize text-foreground">{selectedUser.role}</span>
                                 </div>

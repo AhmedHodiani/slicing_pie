@@ -211,26 +211,26 @@ export default function ContributionsPage() {
                 Contributions Ledger
               </h1>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
                {user.role === "admin" && (
                 <>
                   <button 
                     onClick={() => setShowTimeModal(true)}
-                    className="rounded bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-smooth shadow-sm"
+                    className="rounded bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-smooth shadow-sm whitespace-nowrap"
                   >
-                    + Add Time
+                    + <span className="hidden sm:inline">Add Time</span><span className="sm:hidden">Time</span>
                   </button>
                   <button 
                     onClick={() => setShowMoneyModal(true)}
-                    className="rounded bg-secondary px-4 py-2 text-sm font-medium text-secondary-foreground hover:bg-secondary/80 transition-smooth shadow-sm"
+                    className="rounded bg-secondary px-3 py-2 text-sm font-medium text-secondary-foreground hover:bg-secondary/80 transition-smooth shadow-sm whitespace-nowrap"
                   >
-                    + Add Money
+                    + <span className="hidden sm:inline">Add Money</span><span className="sm:hidden">Money</span>
                   </button>
                   <button 
                     onClick={() => setShowImportModal(true)}
-                    className="rounded bg-muted px-4 py-2 text-sm font-medium text-foreground hover:bg-muted/80 transition-smooth shadow-sm"
+                    className="rounded bg-muted px-3 py-2 text-sm font-medium text-foreground hover:bg-muted/80 transition-smooth shadow-sm whitespace-nowrap"
                   >
-                    Import CSV
+                    <span className="hidden sm:inline">Import CSV</span><span className="sm:hidden">Imp</span>
                   </button>
                 </>
               )}
