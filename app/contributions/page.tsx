@@ -61,6 +61,10 @@ export default function ContributionsPage() {
     direction: 'desc',
   });
 
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 50;
+
   const fetchData = async () => {
     setIsLoading(true);
     try {
@@ -121,6 +125,18 @@ export default function ContributionsPage() {
       return 0;
     });
   }, [contributions, searchQuery, selectedUser, selectedCategory, dateRange, sortConfig]);
+
+  // Pagination Logic
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, selectedUser, selectedCategory, dateRange]);
+
+  const paginatedData = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return filteredData.slice(start, start + itemsPerPage);
+  }, [filteredData, currentPage]);
+
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
 
   // Selection Handlers
   const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -405,7 +421,7 @@ export default function ContributionsPage() {
                                     <td colSpan={user.role === "admin" ? 8 : 7} className="p-8 text-center text-muted-foreground">No contributions found matching your filters.</td>
                                 </tr>
                             ) : (
-                                filteredData.map((row) => (
+                                paginatedData.map((row) => (
                                     <tr key={row.id} className={`hover:bg-muted/30 transition-colors group ${selectedIds.has(row.id) ? 'bg-muted/50' : ''}`}>
                                         {user.role === "admin" && (
                                           <td className="p-3">
@@ -476,6 +492,56 @@ export default function ContributionsPage() {
                             )}
                         </tbody>
                     </table>
+                </div>
+
+                {/* Pagination Controls */}
+                <div className="flex items-center justify-between border-t border-border bg-card px-4 py-3 sm:px-6">
+                  <div className="flex flex-1 justify-between sm:hidden">
+                    <button
+                      onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                      disabled={currentPage === 1}
+                      className="relative inline-flex items-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground hover:bg-muted disabled:opacity-50"
+                    >
+                      Previous
+                    </button>
+                    <button
+                      onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                      disabled={currentPage === totalPages || totalPages === 0}
+                      className="relative ml-3 inline-flex items-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground hover:bg-muted disabled:opacity-50"
+                    >
+                      Next
+                    </button>
+                  </div>
+                  <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground">
+                        Showing <span className="font-medium">{(currentPage - 1) * itemsPerPage + 1}</span> to <span className="font-medium">{Math.min(currentPage * itemsPerPage, filteredData.length)}</span> of <span className="font-medium">{filteredData.length}</span> results
+                      </p>
+                    </div>
+                    <div>
+                      <nav className="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
+                        <button
+                          onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                          disabled={currentPage === 1}
+                          className="relative inline-flex items-center rounded-l-md px-2 py-2 text-muted-foreground ring-1 ring-inset ring-border hover:bg-muted focus:z-20 focus:outline-offset-0 disabled:opacity-50"
+                        >
+                          <span className="sr-only">Previous</span>
+                          ←
+                        </button>
+                        <span className="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-foreground ring-1 ring-inset ring-border focus:outline-offset-0">
+                          Page {currentPage} of {totalPages || 1}
+                        </span>
+                        <button
+                          onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                          disabled={currentPage === totalPages || totalPages === 0}
+                          className="relative inline-flex items-center rounded-r-md px-2 py-2 text-muted-foreground ring-1 ring-inset ring-border hover:bg-muted focus:z-20 focus:outline-offset-0 disabled:opacity-50"
+                        >
+                          <span className="sr-only">Next</span>
+                          →
+                        </button>
+                      </nav>
+                    </div>
+                  </div>
                 </div>
 
                 {/* Bulk Actions */}
