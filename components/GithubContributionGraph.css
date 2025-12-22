@@ -10,3 +10,13 @@
   width: 100% !important;
   height: auto !important;
 }
+
+/* Dark mode text visibility */
+.dark .github-contribution-graph-wrapper svg {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+.dark .github-contribution-graph-wrapper text {
+  /* Invert black text to white */
+  fill: #000000 !important;
+}
