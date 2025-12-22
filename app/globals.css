@@ -61,6 +61,21 @@
     --sidebar-ring: 142 40% 10%;
   }
 
+  /* Global cursor pointer for interactive elements */
+  button, 
+  a, 
+  [role="button"], 
+  select, 
+  input[type="submit"], 
+  input[type="reset"], 
+  input[type="button"], 
+  input[type="checkbox"], 
+  input[type="radio"], 
+  input[type="date"],
+  label[for] {
+    cursor: pointer;
+  }
+
   .dark {
     /* Keep light mode consistent */
     --background: 0 0% 100%;
