@@ -172,8 +172,12 @@ export default function Home() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 justify-between items-center">
             <div className="flex items-center gap-2">
-              <div className="h-8 w-8 bg-primary rounded-sm flex items-center justify-center text-primary-foreground font-bold">SP</div>
               <h1 className="text-xl font-bold text-foreground tracking-tight">Slicing Pie</h1>
+
+              <h1 className="text-xl font-bold text-foreground tracking-tight border-l border-border pl-4">
+                Smart Gov Project 201
+              </h1>
+
             </div>
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 pl-1 pr-3 py-1 rounded-full">

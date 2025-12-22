@@ -6,8 +6,12 @@ import { RecordModel } from "pocketbase";
 import UserForm from "@/components/UserForm";
 import Link from "next/link";
 import Avatar from "@/components/avataaars-lib";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/components/AuthProvider";
 
 export default function UserManagementPage() {
+  const { user } = useAuth();
+  const router = useRouter();
   const [users, setUsers] = useState<RecordModel[]>([]);
   const [loading, setLoading] = useState(true);
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -63,25 +67,38 @@ export default function UserManagementPage() {
     return <div className="p-8 text-center">Loading users...</div>;
   }
 
-  return (
-    <div className="min-h-screen bg-background p-8 font-sans text-foreground">
-      <div className="mx-auto max-w-6xl">
-        <div className="mb-8 flex items-center justify-between">
-          <div>
-            <Link href="/" className="text-sm text-muted-foreground hover:text-primary mb-2 inline-block">
-              ← Back to Dashboard
-            </Link>
-            <h1 className="text-3xl font-bold tracking-tight text-primary">User Management</h1>
-            <p className="text-muted-foreground">Manage users, roles, and salaries.</p>
-          </div>
-          <button
-            onClick={handleCreate}
-            className="rounded bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-smooth shadow-elegant"
-          >
-            + Add User
-          </button>
-        </div>
+  if (!user) return null;
 
+  return (
+    <div className="min-h-screen bg-background pb-12">
+      {/* Header */}
+      <header className="border-b border-border bg-card sticky top-0 z-20">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex h-16 justify-between items-center">
+            <div className="flex items-center gap-4">
+              <button 
+                onClick={() => router.push("/")}
+                className="text-muted-foreground hover:text-foreground transition-colors"
+              >
+                ← Back to Dashboard
+              </button>
+              <h1 className="text-xl font-bold text-foreground tracking-tight border-l border-border pl-4">
+                User Management
+              </h1>
+            </div>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={handleCreate}
+                className="rounded bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-smooth shadow-sm"
+              >
+                + Add User
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 space-y-6">
         <div className="overflow-hidden rounded-lg border border-border bg-card shadow-elegant">
           <table className="min-w-full divide-y divide-border">
             <thead className="bg-muted/50">
@@ -181,7 +198,7 @@ export default function UserManagementPage() {
             </tbody>
           </table>
         </div>
-      </div>
+      </main>
 
       {isFormOpen && (
         <UserForm

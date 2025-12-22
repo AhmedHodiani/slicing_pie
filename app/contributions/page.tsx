@@ -57,9 +57,6 @@ export default function ContributionsPage() {
     direction: 'desc',
   });
 
-  // Selection State
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-
   const fetchData = async () => {
     setIsLoading(true);
     try {
@@ -72,7 +69,8 @@ export default function ContributionsPage() {
       ]);
       setUsers(usersRes);
       setContributions(contributionsRes);
-    } catch (err) {
+    } catch (err: any) {
+      if (err.isAbort) return;
       console.error("Error fetching data:", err);
     } finally {
       setIsLoading(false);
@@ -151,48 +149,6 @@ export default function ContributionsPage() {
       key,
       direction: current.key === key && current.direction === 'asc' ? 'desc' : 'asc',
     }));
-  };
-
-  const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this contribution?")) return;
-    try {
-      await pb.collection("contributions").delete(id);
-      fetchData();
-    } catch (err) {
-      console.error("Failed to delete:", err);
-      alert("Failed to delete contribution");
-    }
-  };
-
-  const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.checked) {
-      setSelectedIds(new Set(filteredData.map(c => c.id)));
-    } else {
-      setSelectedIds(new Set());
-    }
-  };
-
-  const handleSelectOne = (id: string) => {
-    const newSelected = new Set(selectedIds);
-    if (newSelected.has(id)) {
-      newSelected.delete(id);
-    } else {
-      newSelected.add(id);
-    }
-    setSelectedIds(newSelected);
-  };
-
-  const handleBulkDelete = async () => {
-    if (!confirm(`Are you sure you want to delete ${selectedIds.size} contributions?`)) return;
-    
-    try {
-      await Promise.all(Array.from(selectedIds).map(id => pb.collection("contributions").delete(id)));
-      setSelectedIds(new Set());
-      fetchData();
-    } catch (err) {
-      console.error("Failed to delete items:", err);
-      alert("Failed to delete some items");
-    }
   };
 
   if (!user) return null;
@@ -337,30 +293,7 @@ export default function ContributionsPage() {
         </div>
 
         {/* Bulk Actions */}
-        {selectedIds.size > 0 && (
-            <div className="bg-primary/10 border border-primary/20 rounded-lg p-4 flex items-center justify-between animate-in fade-in slide-in-from-top-2">
-                <div className="flex items-center gap-2">
-                    <span className="font-bold text-primary">{selectedIds.size}</span>
-                    <span className="text-sm text-muted-foreground">items selected</span>
-                </div>
-                <div className="flex items-center gap-2">
-                    <button 
-                        onClick={() => setSelectedIds(new Set())}
-                        className="text-sm text-muted-foreground hover:text-foreground px-3 py-1"
-                    >
-                        Cancel
-                    </button>
-                    {user.role === 'admin' && (
-                        <button 
-                            onClick={handleBulkDelete}
-                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90 px-4 py-2 rounded text-sm font-medium transition-colors shadow-sm"
-                        >
-                            Delete Selected
-                        </button>
-                    )}
-                </div>
-            </div>
-        )}
+        {/* Removed */}
 
         {/* Chart & Table Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -370,14 +303,6 @@ export default function ContributionsPage() {
                     <table className="w-full text-left text-sm">
                         <thead className="bg-muted border-b border-border">
                             <tr>
-                                <th className="p-3 w-[40px]">
-                                    <input 
-                                        type="checkbox"
-                                        className="rounded border-input text-primary focus:ring-primary"
-                                        checked={filteredData.length > 0 && selectedIds.size === filteredData.length}
-                                        onChange={handleSelectAll}
-                                    />
-                                </th>
                                 <th 
                                     className="p-3 font-medium cursor-pointer hover:bg-muted/80 transition-colors"
                                     onClick={() => handleSort('date')}
@@ -404,7 +329,6 @@ export default function ContributionsPage() {
                                 >
                                     Slices {sortConfig.key === 'slices' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
                                 </th>
-                                {user.role === 'admin' && <th className="p-3 font-medium text-right">Actions</th>}
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-border">
@@ -419,14 +343,6 @@ export default function ContributionsPage() {
                             ) : (
                                 filteredData.map((row) => (
                                     <tr key={row.id} className="hover:bg-muted/30 transition-colors group">
-                                        <td className="p-3">
-                                            <input 
-                                                type="checkbox"
-                                                className="rounded border-input text-primary focus:ring-primary"
-                                                checked={selectedIds.has(row.id)}
-                                                onChange={() => handleSelectOne(row.id)}
-                                            />
-                                        </td>
                                         <td className="p-3 whitespace-nowrap text-muted-foreground">
                                             {new Date(row.date).toLocaleDateString()}
                                         </td>
@@ -471,17 +387,6 @@ export default function ContributionsPage() {
                                         <td className="p-3 text-right font-mono font-bold text-primary">
                                             {row.slices.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                         </td>
-                                        {user.role === 'admin' && (
-                                            <td className="p-3 text-right">
-                                                <button 
-                                                    onClick={() => handleDelete(row.id)}
-                                                    className="text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
-                                                    title="Delete Contribution"
-                                                >
-                                                    🗑️
-                                                </button>
-                                            </td>
-                                        )}
                                     </tr>
                                 ))
                             )}
@@ -490,22 +395,7 @@ export default function ContributionsPage() {
                 </div>
 
                 {/* Bulk Actions */}
-                {selectedIds.size > 0 && (
-                  <div className="bg-muted p-4 border-t border-border">
-                    <div className="flex justify-between items-center">
-                      <div className="text-sm text-muted-foreground">
-                        {selectedIds.size} contribution
-                        {selectedIds.size > 1 ? 's' : ''} selected
-                      </div>
-                      <button 
-                        onClick={handleBulkDelete}
-                        className="rounded bg-destructive px-4 py-2 text-sm font-medium text-destructive-foreground hover:bg-destructive/90 transition-smooth shadow-sm"
-                      >
-                        Delete Selected
-                      </button>
-                    </div>
-                  </div>
-                )}
+                {/* Removed */}
             </div>
         </div>
 
