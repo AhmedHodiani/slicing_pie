@@ -10,12 +10,18 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
 
 export default function UserManagementPage() {
-  const { user } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const router = useRouter();
   const [users, setUsers] = useState<RecordModel[]>([]);
   const [loading, setLoading] = useState(true);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<RecordModel | undefined>(undefined);
+
+  useEffect(() => {
+    if (!authLoading && user && user.role !== 'admin') {
+      router.push('/');
+    }
+  }, [user, authLoading, router]);
 
   const fetchUsers = async () => {
     try {
@@ -63,11 +69,11 @@ export default function UserManagementPage() {
     fetchUsers();
   };
 
+  if (authLoading || !user || user.role !== 'admin') return null;
+
   if (loading) {
     return <div className="p-8 text-center">Loading users...</div>;
   }
-
-  if (!user) return null;
 
   return (
     <div className="min-h-screen bg-background pb-12">

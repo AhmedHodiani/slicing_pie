@@ -300,16 +300,14 @@ export default function Home() {
             })}
         </div>
 
-        <div className="p-4 border-t border-border bg-muted/30">
-             {user.role === "admin" && (
-                <button
-                  onClick={() => router.push("/admin/users")}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-foreground bg-background border border-border rounded-md hover:bg-muted transition-colors mb-2"
-                >
-                  Manage Users
-                </button>
-              )}
-        </div>
+        {user.role === "admin" && (<div className="p-4 border-t border-border bg-muted/30">
+            <button
+                onClick={() => router.push("/admin/users")}
+                className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-foreground bg-background border border-border rounded-md hover:bg-muted transition-colors mb-2"
+            >
+                Manage Users
+            </button>
+        </div>)}
       </aside>
 
       {/* Right Content */}
@@ -344,7 +342,7 @@ export default function Home() {
                     </div>
                 )}
 
-                <div className="h-6 w-px bg-border mx-2"></div>
+                {user.role === "admin" && <div className="h-6 w-px bg-border mx-2"></div>}
 
                 <button
                     onClick={() => router.push("/contributions")}
