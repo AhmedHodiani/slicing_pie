@@ -43,6 +43,10 @@ export default function ContributionsPage() {
   const [showTimeModal, setShowTimeModal] = useState(false);
   const [showMoneyModal, setShowMoneyModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
+  const [editingContribution, setEditingContribution] = useState<Contribution | null>(null);
+
+  // Selection State
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   // Filter State
   const [searchQuery, setSearchQuery] = useState("");
@@ -69,6 +73,7 @@ export default function ContributionsPage() {
       ]);
       setUsers(usersRes);
       setContributions(contributionsRes);
+      setSelectedIds(new Set()); // Clear selection on refresh
     } catch (err: any) {
       if (err.isAbort) return;
       console.error("Error fetching data:", err);
@@ -116,6 +121,42 @@ export default function ContributionsPage() {
       return 0;
     });
   }, [contributions, searchQuery, selectedUser, selectedCategory, dateRange, sortConfig]);
+
+  // Selection Handlers
+  const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.checked) {
+      setSelectedIds(new Set(filteredData.map(c => c.id)));
+    } else {
+      setSelectedIds(new Set());
+    }
+  };
+
+  const handleSelectRow = (id: string) => {
+    const newSelected = new Set(selectedIds);
+    if (newSelected.has(id)) {
+      newSelected.delete(id);
+    } else {
+      newSelected.add(id);
+    }
+    setSelectedIds(newSelected);
+  };
+
+  const handleDeleteSelected = async () => {
+    if (selectedIds.size === 0) return;
+    if (!confirm(`Are you sure you want to delete ${selectedIds.size} contributions? This cannot be undone.`)) return;
+
+    try {
+      await Promise.all(Array.from(selectedIds).map(id => pb.collection("contributions").delete(id)));
+      fetchData();
+    } catch (err) {
+      console.error("Error deleting contributions:", err);
+      alert("Failed to delete some contributions.");
+    }
+  };
+
+  const handleEdit = (contribution: Contribution) => {
+    setEditingContribution(contribution);
+  };
 
   // Derived State: Stats
   const stats = useMemo(() => {
@@ -202,69 +243,81 @@ export default function ContributionsPage() {
         
         {/* Filters & Controls */}
         <div className="bg-card border border-border rounded-lg p-4 shadow-sm space-y-4">
-            <div className="flex flex-col md:flex-row gap-4 justify-between">
-                {/* Search */}
-                <div className="flex-1 min-w-[200px]">
-                    <label className="text-xs font-semibold text-muted-foreground uppercase mb-1 block">Search</label>
-                    <input 
-                        type="text" 
-                        placeholder="Search description or user..." 
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full bg-background border border-input rounded px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-                    />
+            <div className="flex flex-col md:flex-row gap-4 justify-between items-end">
+                <div className="flex-1 flex flex-col md:flex-row gap-4 w-full">
+                  {/* Search */}
+                  <div className="flex-1 min-w-[200px]">
+                      <label className="text-xs font-semibold text-muted-foreground uppercase mb-1 block">Search</label>
+                      <input 
+                          type="text" 
+                          placeholder="Search description or user..." 
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          className="w-full bg-background border border-input rounded px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                      />
+                  </div>
+
+                  {/* User Filter */}
+                  <div className="min-w-[150px]">
+                      <label className="text-xs font-semibold text-muted-foreground uppercase mb-1 block">User</label>
+                      <select 
+                          value={selectedUser}
+                          onChange={(e) => setSelectedUser(e.target.value)}
+                          className="w-full bg-background border border-input rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                      >
+                          <option value="ALL">All Users</option>
+                          {users.map(u => (
+                              <option key={u.id} value={u.id}>{u.name || u.email}</option>
+                          ))}
+                      </select>
+                  </div>
+
+                  {/* Category Filter */}
+                  <div className="min-w-[150px]">
+                      <label className="text-xs font-semibold text-muted-foreground uppercase mb-1 block">Category</label>
+                      <select 
+                          value={selectedCategory}
+                          onChange={(e) => setSelectedCategory(e.target.value)}
+                          className="w-full bg-background border border-input rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                      >
+                          <option value="ALL">All Categories</option>
+                          <option value="time">Time</option>
+                          <option value="money">Money</option>
+                      </select>
+                  </div>
+
+                  {/* Date Range */}
+                  <div className="flex gap-2">
+                      <div>
+                          <label className="text-xs font-semibold text-muted-foreground uppercase mb-1 block">From</label>
+                          <input 
+                              type="date" 
+                              value={dateRange.start}
+                              onChange={(e) => setDateRange(prev => ({ ...prev, start: e.target.value }))}
+                              className="bg-background border border-input rounded px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                          />
+                      </div>
+                      <div>
+                          <label className="text-xs font-semibold text-muted-foreground uppercase mb-1 block">To</label>
+                          <input 
+                              type="date" 
+                              value={dateRange.end}
+                              onChange={(e) => setDateRange(prev => ({ ...prev, end: e.target.value }))}
+                              className="bg-background border border-input rounded px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                          />
+                      </div>
+                  </div>
                 </div>
 
-                {/* User Filter */}
-                <div className="min-w-[150px]">
-                    <label className="text-xs font-semibold text-muted-foreground uppercase mb-1 block">User</label>
-                    <select 
-                        value={selectedUser}
-                        onChange={(e) => setSelectedUser(e.target.value)}
-                        className="w-full bg-background border border-input rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-                    >
-                        <option value="ALL">All Users</option>
-                        {users.map(u => (
-                            <option key={u.id} value={u.id}>{u.name || u.email}</option>
-                        ))}
-                    </select>
-                </div>
-
-                {/* Category Filter */}
-                <div className="min-w-[150px]">
-                    <label className="text-xs font-semibold text-muted-foreground uppercase mb-1 block">Category</label>
-                    <select 
-                        value={selectedCategory}
-                        onChange={(e) => setSelectedCategory(e.target.value)}
-                        className="w-full bg-background border border-input rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-                    >
-                        <option value="ALL">All Categories</option>
-                        <option value="time">Time</option>
-                        <option value="money">Money</option>
-                    </select>
-                </div>
-
-                {/* Date Range */}
-                <div className="flex gap-2">
-                    <div>
-                        <label className="text-xs font-semibold text-muted-foreground uppercase mb-1 block">From</label>
-                        <input 
-                            type="date" 
-                            value={dateRange.start}
-                            onChange={(e) => setDateRange(prev => ({ ...prev, start: e.target.value }))}
-                            className="bg-background border border-input rounded px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-                        />
-                    </div>
-                    <div>
-                        <label className="text-xs font-semibold text-muted-foreground uppercase mb-1 block">To</label>
-                        <input 
-                            type="date" 
-                            value={dateRange.end}
-                            onChange={(e) => setDateRange(prev => ({ ...prev, end: e.target.value }))}
-                            className="bg-background border border-input rounded px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-                        />
-                    </div>
-                </div>
+                {/* Bulk Actions */}
+                {user.role === "admin" && selectedIds.size > 0 && (
+                  <button
+                    onClick={handleDeleteSelected}
+                    className="flex-shrink-0 rounded bg-destructive px-4 py-2 text-sm font-medium text-destructive-foreground hover:bg-destructive/90 transition-smooth shadow-sm"
+                  >
+                    Delete Selected ({selectedIds.size})
+                  </button>
+                )}
             </div>
         </div>
 
@@ -303,6 +356,16 @@ export default function ContributionsPage() {
                     <table className="w-full text-left text-sm text-foreground">
                         <thead className="bg-muted border-b border-border">
                             <tr>
+                                {user.role === "admin" && (
+                                  <th className="p-3 w-10">
+                                    <input 
+                                      type="checkbox"
+                                      checked={filteredData.length > 0 && selectedIds.size === filteredData.length}
+                                      onChange={handleSelectAll}
+                                      className="rounded border-input text-primary focus:ring-primary"
+                                    />
+                                  </th>
+                                )}
                                 <th 
                                     className="p-3 font-medium text-muted-foreground cursor-pointer hover:bg-muted/80 transition-colors"
                                     onClick={() => handleSort('date')}
@@ -329,20 +392,31 @@ export default function ContributionsPage() {
                                 >
                                     Slices {sortConfig.key === 'slices' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
                                 </th>
+                                {user.role === "admin" && <th className="p-3 w-10"></th>}
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-border">
                             {isLoading ? (
                                 <tr>
-                                    <td colSpan={7} className="p-8 text-center text-muted-foreground">Loading contributions...</td>
+                                    <td colSpan={user.role === "admin" ? 8 : 7} className="p-8 text-center text-muted-foreground">Loading contributions...</td>
                                 </tr>
                             ) : filteredData.length === 0 ? (
                                 <tr>
-                                    <td colSpan={7} className="p-8 text-center text-muted-foreground">No contributions found matching your filters.</td>
+                                    <td colSpan={user.role === "admin" ? 8 : 7} className="p-8 text-center text-muted-foreground">No contributions found matching your filters.</td>
                                 </tr>
                             ) : (
                                 filteredData.map((row) => (
-                                    <tr key={row.id} className="hover:bg-muted/30 transition-colors group">
+                                    <tr key={row.id} className={`hover:bg-muted/30 transition-colors group ${selectedIds.has(row.id) ? 'bg-muted/50' : ''}`}>
+                                        {user.role === "admin" && (
+                                          <td className="p-3">
+                                            <input 
+                                              type="checkbox"
+                                              checked={selectedIds.has(row.id)}
+                                              onChange={() => handleSelectRow(row.id)}
+                                              className="rounded border-input text-primary focus:ring-primary"
+                                            />
+                                          </td>
+                                        )}
                                         <td className="p-3 whitespace-nowrap text-muted-foreground">
                                             {new Date(row.date).toLocaleDateString()}
                                         </td>
@@ -387,6 +461,16 @@ export default function ContributionsPage() {
                                         <td className="p-3 text-right font-mono font-bold text-primary">
                                             {row.slices.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                         </td>
+                                        {user.role === "admin" && (
+                                          <td className="p-3 text-right">
+                                            <button 
+                                              onClick={() => handleEdit(row)}
+                                              className="text-xs font-medium text-primary hover:underline opacity-0 group-hover:opacity-100 transition-opacity"
+                                            >
+                                              Edit
+                                            </button>
+                                          </td>
+                                        )}
                                     </tr>
                                 ))
                             )}
@@ -421,6 +505,15 @@ export default function ContributionsPage() {
       {showImportModal && (
         <ContributionImport
           onClose={() => setShowImportModal(false)}
+          onSuccess={fetchData}
+        />
+      )}
+
+      {editingContribution && (
+        <ContributionForm
+          type={editingContribution.category}
+          contribution={editingContribution}
+          onClose={() => setEditingContribution(null)}
           onSuccess={fetchData}
         />
       )}

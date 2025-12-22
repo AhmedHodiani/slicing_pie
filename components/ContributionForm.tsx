@@ -7,15 +7,16 @@ import { RecordModel } from "pocketbase";
 
 interface ContributionFormProps {
   type: "time" | "money";
+  contribution?: RecordModel;
   onClose: () => void;
   onSuccess: () => void;
 }
 
-export default function ContributionForm({ type, onClose, onSuccess }: ContributionFormProps) {
+export default function ContributionForm({ type, contribution, onClose, onSuccess }: ContributionFormProps) {
   const { user } = useAuth();
-  const [amount, setAmount] = useState("");
-  const [description, setDescription] = useState("");
-  const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
+  const [amount, setAmount] = useState(contribution?.amount?.toString() || "");
+  const [description, setDescription] = useState(contribution?.description || "");
+  const [date, setDate] = useState(contribution?.date ? new Date(contribution.date).toISOString().split("T")[0] : new Date().toISOString().split("T")[0]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
   
@@ -30,7 +31,9 @@ export default function ContributionForm({ type, onClose, onSuccess }: Contribut
         .then((records) => {
           setUsers(records);
           // Default to current user if in list, otherwise first user
-          if (records.length > 0) {
+          if (contribution) {
+            setSelectedUserId(contribution.user);
+          } else if (records.length > 0) {
             setSelectedUserId(user.id);
           }
         })
@@ -41,7 +44,7 @@ export default function ContributionForm({ type, onClose, onSuccess }: Contribut
     } else if (user) {
       setSelectedUserId(user.id);
     }
-  }, [user]);
+  }, [user, contribution]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -74,7 +77,7 @@ export default function ContributionForm({ type, onClose, onSuccess }: Contribut
 
       const slices = fmv * multiplier;
 
-      await pb.collection("contributions").create({
+      const data = {
         user: selectedUserId,
         category: type,
         amount: numAmount,
@@ -83,7 +86,13 @@ export default function ContributionForm({ type, onClose, onSuccess }: Contribut
         slices: slices,
         description: description,
         date: new Date(date).toISOString(),
-      });
+      };
+
+      if (contribution) {
+        await pb.collection("contributions").update(contribution.id, data);
+      } else {
+        await pb.collection("contributions").create(data);
+      }
 
       onSuccess();
       onClose();
@@ -99,7 +108,7 @@ export default function ContributionForm({ type, onClose, onSuccess }: Contribut
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
       <div className="w-full max-w-md rounded-lg border border-border bg-card p-6 shadow-elegant">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-xl font-bold text-foreground capitalize">Add {type}</h2>
+          <h2 className="text-xl font-bold text-foreground capitalize">{contribution ? "Edit" : "Add"} {type}</h2>
           <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
             ✕
           </button>
