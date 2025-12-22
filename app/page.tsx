@@ -150,7 +150,8 @@ export default function Home() {
       }));
       setUsersWithStats(usersStats);
 
-    } catch (err) {
+    } catch (err: any) {
+      if (err.isAbort) return;
       console.error("Error fetching data:", err);
     }
   };

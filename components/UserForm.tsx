@@ -100,6 +100,7 @@ export default function UserForm({ user, onClose, onSuccess }: UserFormProps) {
       onSuccess();
       onClose();
     } catch (err: any) {
+      if (err.isAbort) return;
       console.error(err);
       setError(err.message || "Failed to save user.");
     } finally {

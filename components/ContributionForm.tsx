@@ -34,7 +34,10 @@ export default function ContributionForm({ type, onClose, onSuccess }: Contribut
             setSelectedUserId(user.id);
           }
         })
-        .catch(console.error);
+        .catch((err) => {
+          if (err.isAbort) return;
+          console.error(err);
+        });
     } else if (user) {
       setSelectedUserId(user.id);
     }

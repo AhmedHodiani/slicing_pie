@@ -5,6 +5,7 @@ import pb from "@/lib/pocketbase";
 import { RecordModel } from "pocketbase";
 import UserForm from "@/components/UserForm";
 import Link from "next/link";
+import Avatar from "@/components/avataaars-lib";
 
 export default function UserManagementPage() {
   const [users, setUsers] = useState<RecordModel[]>([]);
@@ -18,7 +19,8 @@ export default function UserManagementPage() {
         sort: "-created",
       });
       setUsers(records);
-    } catch (err) {
+    } catch (err: any) {
+      if (err.isAbort) return;
       console.error("Error fetching users:", err);
     } finally {
       setLoading(false);
@@ -111,17 +113,25 @@ export default function UserManagementPage() {
               {users.map((user) => (
                 <tr key={user.id} className="hover:bg-muted/30 transition-colors">
                   <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-foreground flex items-center gap-3">
-                    {user.avatar ? (
-                      <img
+                    <div className="flex-shrink-0 mr-4 h-10 w-10 rounded-full overflow-hidden flex items-center justify-center">
+                      {user?.avatar_options ? (
+                        <Avatar
+                        style={{ width: '100%', height: '100%' }}
+                        avatarStyle="Circle"
+                        {...user.avatar_options}
+                        />
+                      ) : user?.avatar ? (
+                        <img
                         src={pb.files.getUrl(user, user.avatar)}
                         alt={user.name}
-                        className="h-8 w-8 rounded-full object-cover bg-muted"
-                      />
-                    ) : (
-                      <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center text-xs font-bold">
-                        {user.name?.charAt(0).toUpperCase() || "?"}
-                      </div>
-                    )}
+                        className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <div className="text-sm font-bold text-muted-foreground">
+                          {user?.name?.charAt(0).toUpperCase() || "?"}
+                        </div>
+                      )}
+                    </div>
                     <span>{user.name}</span>
                   </td>
                   <td className="whitespace-nowrap px-6 py-4 text-sm text-muted-foreground">

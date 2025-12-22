@@ -51,7 +51,7 @@ export default function WhatIfCalculator({ currentTotalSlices, currentUserSlices
   return (
     <div className="rounded-lg border border-border bg-card p-6 shadow-card h-full">
       <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-        <span className="text-xl">🔮</span> Equity Simulator
+        Equity Simulator
       </h2>
       <p className="text-sm text-muted-foreground mb-6">
         See how your equity changes if you contribute more time or money today.

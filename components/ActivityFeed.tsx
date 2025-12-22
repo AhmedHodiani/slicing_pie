@@ -36,7 +36,7 @@ export default function ActivityFeed({ contributions }: ActivityFeedProps) {
           
           return (
             <div key={c.id} className="flex items-center p-4 hover:bg-muted/20 transition-colors">
-              <div className="flex-shrink-0 mr-4 h-10 w-10 rounded-full overflow-hidden bg-muted flex items-center justify-center">
+              <div className="flex-shrink-0 mr-4 h-10 w-10 rounded-full overflow-hidden flex items-center justify-center">
                 {user?.avatar_options ? (
                   <Avatar
                     style={{ width: '100%', height: '100%' }}

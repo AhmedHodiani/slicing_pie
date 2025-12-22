@@ -13,7 +13,8 @@ export default function LoginPage() {
     e.preventDefault();
     try {
       await login(email, password);
-    } catch (err) {
+    } catch (err: any) {
+      if (err.isAbort) return;
       setError("Invalid credentials");
     }
   };

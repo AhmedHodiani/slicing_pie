@@ -50,7 +50,8 @@ export default function SettingsPage() {
       setMessage("Settings saved successfully!");
       // Refresh auth store to update user context
       await pb.collection("users").authRefresh();
-    } catch (err) {
+    } catch (err: any) {
+      if (err.isAbort) return;
       console.error(err);
       setMessage("Failed to save settings.");
     } finally {

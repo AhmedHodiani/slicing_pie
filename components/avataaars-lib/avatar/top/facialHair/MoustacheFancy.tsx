@@ -30,6 +30,13 @@ export default class MoustacheFancy extends React.Component {
           fillRule='evenodd'
           xlinkHref={'#' + path1}
         />
+        {/* Chin hair */}
+        <path
+          d="M66 96
+            L102 96
+            C98 124, 70 124, 66 96 Z"
+          fill="#4a312c"
+        />
         <Colors maskID={mask1} />
       </g>
     )
