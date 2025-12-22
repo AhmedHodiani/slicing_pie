@@ -132,6 +132,9 @@ export default function ContributionImport({ onClose, onSuccess }: ContributionI
         }
 
         const roundedAmount = Math.round(amount * 100) / 100;
+        if (roundedAmount <= 0 && amount > 0) {
+             errors.push(`Duration too small (rounds to 0): ${durationDecimal}`);
+        }
 
         const rate = targetUser?.hourly_rate || 0;
         const fmv = roundedAmount * rate;
@@ -176,34 +179,62 @@ export default function ContributionImport({ onClose, onSuccess }: ContributionI
     setStep('importing');
     setImportProgress({ current: 0, total: validRows.length, success: 0, fail: 0 });
 
-    let success = 0;
-    let fail = 0;
-
-    for (let i = 0; i < validRows.length; i++) {
-        const row = validRows[i];
-        try {
-            await pb.collection("contributions").create({
-                user: row.user!.id,
-                category: "time",
-                amount: row.hours,
-                fair_market_value: row.fmv,
-                multiplier: 2,
-                slices: row.slices,
-                description: row.description,
-                date: row.date,
-            });
-            success++;
-        } catch (err) {
-            console.error(err);
-            fail++;
-        }
-        setImportProgress(prev => ({ ...prev, current: i + 1, success, fail }));
+    const BATCH_SIZE = 50;
+    const chunks = [];
+    for (let i = 0; i < validRows.length; i += BATCH_SIZE) {
+        chunks.push(validRows.slice(i, i + BATCH_SIZE));
     }
 
-    setTimeout(() => {
-        onSuccess();
-        onClose();
-    }, 1000);
+    let successCount = 0;
+    let failCount = 0;
+
+    for (const chunk of chunks) {
+        try {
+            const batch = pb.createBatch();
+
+            for (const row of chunk) {
+                batch.collection("contributions").create({
+                    user: row.user!.id,
+                    category: "time",
+                    amount: row.hours,
+                    fair_market_value: row.fmv,
+                    multiplier: 2,
+                    slices: row.slices,
+                    description: row.description,
+                    date: row.date,
+                });
+            }
+
+            await batch.send();
+            successCount += chunk.length;
+        } catch (err: any) {
+            console.error("Batch import failed", err);
+            failCount += chunk.length;
+            // If we want to stop on error, we can break here. 
+            // But maybe better to try other chunks?
+            // For now, let's continue.
+        }
+
+        setImportProgress(prev => ({ 
+            ...prev, 
+            current: Math.min(prev.current + chunk.length, validRows.length), 
+            success: successCount, 
+            fail: failCount 
+        }));
+    }
+
+    if (failCount > 0) {
+        setError(`Import completed with ${failCount} failures. Check console for details.`);
+        // Don't close immediately if there are errors
+        setTimeout(() => {
+            onSuccess(); // Refresh data anyway
+        }, 1000);
+    } else {
+        setTimeout(() => {
+            onSuccess();
+            onClose();
+        }, 1000);
+    }
   };
 
   return (
