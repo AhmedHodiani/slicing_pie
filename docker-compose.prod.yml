@@ -1,0 +1,57 @@
+# ===========================================
+# Production Docker Compose for Portainer
+# ===========================================
+# Deploy this stack in Portainer:
+#   1. Go to Stacks > Add Stack
+#   2. Paste this file content
+#   3. Add environment variables (see below)
+#   4. Deploy
+#
+# Environment Variables:
+#   - NEXTJS_IMAGE: your-dockerhub-username/slicing-pie:latest
+#   - NEXTJS_PORT: 3000 (optional)
+#   - POCKETBASE_PORT: 8090 (optional)
+# ===========================================
+
+services:
+  # PocketBase Backend
+  pocketbase:
+    image: ghcr.io/muchobien/pocketbase:latest
+    container_name: slicing_pie_pocketbase
+    restart: unless-stopped
+    ports:
+      - "${POCKETBASE_PORT:-8090}:8090"
+    volumes:
+      - pocketbase_data:/pb_data
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8090/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - slicing_pie_network
+
+  # Next.js Frontend (Docker Hub image)
+  nextjs:
+    image: ${NEXTJS_IMAGE}
+    container_name: slicing_pie_nextjs
+    restart: unless-stopped
+    ports:
+      - "${NEXTJS_PORT:-3000}:3000"
+    environment:
+      - NODE_ENV=production
+      - POCKETBASE_URL=http://pocketbase:8090
+    depends_on:
+      pocketbase:
+        condition: service_healthy
+    networks:
+      - slicing_pie_network
+
+volumes:
+  pocketbase_data:
+    driver: local
+
+networks:
+  slicing_pie_network:
+    driver: bridge

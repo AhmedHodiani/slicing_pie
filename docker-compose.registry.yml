@@ -1,0 +1,73 @@
+# ===========================================
+# Production Docker Compose with Private Registry
+# ===========================================
+# This includes a self-hosted Docker registry for private image hosting
+# 
+# Usage:
+#   1. Start registry: docker compose -f docker-compose.registry.yml up -d registry
+#   2. Build & push:   docker build -t localhost:5000/slicing-pie:latest .
+#                      docker push localhost:5000/slicing-pie:latest
+#   3. Start all:      docker compose -f docker-compose.registry.yml up -d
+# ===========================================
+
+services:
+  # Private Docker Registry
+  registry:
+    image: registry:2
+    container_name: slicing_pie_registry
+    restart: unless-stopped
+    ports:
+      - "${REGISTRY_PORT:-5000}:5000"
+    volumes:
+      - registry_data:/var/lib/registry
+    networks:
+      - slicing_pie_network
+
+  # PocketBase Backend
+  pocketbase:
+    image: ghcr.io/muchobien/pocketbase:latest
+    container_name: slicing_pie_pocketbase
+    restart: unless-stopped
+    ports:
+      - "${POCKETBASE_PORT:-8090}:8090"
+    volumes:
+      - pocketbase_data:/pb_data
+      - pocketbase_migrations:/pb_migrations
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8090/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - slicing_pie_network
+
+  # Next.js Frontend
+  nextjs:
+    image: ${NEXTJS_IMAGE:-localhost:5000/slicing-pie:latest}
+    container_name: slicing_pie_nextjs
+    restart: unless-stopped
+    ports:
+      - "${NEXTJS_PORT:-3000}:3000"
+    environment:
+      - NODE_ENV=production
+      - POCKETBASE_URL=http://pocketbase:8090
+    depends_on:
+      pocketbase:
+        condition: service_healthy
+      registry:
+        condition: service_started
+    networks:
+      - slicing_pie_network
+
+volumes:
+  registry_data:
+    driver: local
+  pocketbase_data:
+    driver: local
+  pocketbase_migrations:
+    driver: local
+
+networks:
+  slicing_pie_network:
+    driver: bridge
