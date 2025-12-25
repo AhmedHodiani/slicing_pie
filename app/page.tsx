@@ -292,6 +292,9 @@ export default function Home() {
         <div className="px-6 py-[17.5px] border-b border-border flex justify-between items-center">
             <div className="flex items-center gap-2">
                 <h1 className="text-xl font-bold text-foreground tracking-tight">Smart Gov Project 201</h1>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-semibold border border-primary/20">
+                  v0.1.0
+                </span>
             </div>
             <button 
               onClick={() => setIsSidebarOpen(false)}

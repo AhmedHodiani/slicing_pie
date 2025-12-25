@@ -42,4 +42,5 @@ next-env.d.ts
 
 
 # pocketbase data
-/pocketbase/pd_data/
+pocketbase/pb_data
+pocketbase/pb_data/*.db

@@ -47,6 +47,9 @@ export default function ContributionsPage() {
 
   // Selection State
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteProgress, setDeleteProgress] = useState({ current: 0, total: 0 });
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   // Filter State
   const [searchQuery, setSearchQuery] = useState("");
@@ -159,14 +162,42 @@ export default function ContributionsPage() {
 
   const handleDeleteSelected = async () => {
     if (selectedIds.size === 0) return;
-    if (!confirm(`Are you sure you want to delete ${selectedIds.size} contributions? This cannot be undone.`)) return;
+    
+    setShowDeleteConfirm(false);
+    setIsDeleting(true);
+    const idsArray = Array.from(selectedIds);
+    setDeleteProgress({ current: 0, total: idsArray.length });
 
     try {
-      await Promise.all(Array.from(selectedIds).map(id => pb.collection("contributions").delete(id)));
-      fetchData();
+      const BATCH_SIZE = 50;
+      const chunks = [];
+      
+      for (let i = 0; i < idsArray.length; i += BATCH_SIZE) {
+        chunks.push(idsArray.slice(i, i + BATCH_SIZE));
+      }
+
+      for (const chunk of chunks) {
+        const batch = pb.createBatch();
+        for (const id of chunk) {
+          batch.collection("contributions").delete(id);
+        }
+        await batch.send();
+        
+        setDeleteProgress(prev => ({ 
+          ...prev, 
+          current: Math.min(prev.current + chunk.length, idsArray.length)
+        }));
+      }
+      
+      setTimeout(() => {
+        setIsDeleting(false);
+        fetchData();
+      }, 500);
     } catch (err) {
       console.error("Error deleting contributions:", err);
       alert("Failed to delete some contributions.");
+      setIsDeleting(false);
+      setShowDeleteConfirm(false);
     }
   };
 
@@ -328,8 +359,8 @@ export default function ContributionsPage() {
                 {/* Bulk Actions */}
                 {user.role === "admin" && selectedIds.size > 0 && (
                   <button
-                    onClick={handleDeleteSelected}
-                    className="flex-shrink-0 rounded bg-destructive px-4 py-2 text-sm font-medium text-destructive-foreground hover:bg-destructive/90 transition-smooth shadow-sm"
+                    onClick={() => setShowDeleteConfirm(true)}
+                    className="shrink-0 rounded bg-destructive px-4 py-2 text-sm font-medium text-destructive-foreground hover:bg-destructive/90 transition-smooth shadow-sm"
                   >
                     Delete Selected ({selectedIds.size})
                   </button>
@@ -582,6 +613,53 @@ export default function ContributionsPage() {
           onClose={() => setEditingContribution(null)}
           onSuccess={fetchData}
         />
+      )}
+
+      {/* Delete Progress Modal */}
+      {isDeleting && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-lg border border-border bg-card p-6 shadow-elegant">
+            <div className="py-8 text-center space-y-4">
+              <div className="text-lg font-medium text-foreground">Deleting Contributions...</div>
+              <div className="w-full bg-muted rounded-full h-2.5 overflow-hidden">
+                <div 
+                  className="bg-destructive h-2.5 rounded-full transition-all duration-300" 
+                  style={{ width: `${(deleteProgress.current / deleteProgress.total) * 100}%` }}
+                ></div>
+              </div>
+              <div className="text-sm text-muted-foreground">
+                Deleted {deleteProgress.current} of {deleteProgress.total}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="w-full max-w-md rounded-lg border border-border bg-card p-6 shadow-elegant">
+            <h3 className="text-lg font-bold text-foreground mb-2">Delete Contributions</h3>
+            <p className="text-muted-foreground mb-6">
+              Are you sure you want to delete <strong className="text-foreground">{selectedIds.size}</strong> contribution{selectedIds.size !== 1 ? 's' : ''}? 
+              <span className="block mt-2 text-destructive font-medium">This action cannot be undone.</span>
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="rounded px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-muted transition-smooth"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteSelected}
+                className="rounded bg-destructive px-4 py-2 text-sm font-medium text-destructive-foreground hover:bg-destructive/90 transition-smooth"
+              >
+                Delete {selectedIds.size} Contribution{selectedIds.size !== 1 ? 's' : ''}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
