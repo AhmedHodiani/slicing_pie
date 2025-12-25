@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
+import ChangePasswordModal from "@/components/ChangePasswordModal";
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -9,6 +10,8 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
+  const [changePasswordMode, setChangePasswordMode] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -16,6 +19,10 @@ export default function LoginPage() {
     setError("");
     try {
       await login(email, password);
+      if (changePasswordMode) {
+        // User wants to change password after login
+        setShowChangePasswordModal(true);
+      }
     } catch (err: any) {
       if (err.isAbort) return;
       setError("Invalid email or password. Please try again.");
@@ -62,6 +69,16 @@ export default function LoginPage() {
                     <label htmlFor="password" className="block text-xs font-bold text-muted-foreground uppercase tracking-wider">
                       Password
                     </label>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setChangePasswordMode(true);
+                        setError("Please sign in with your current password, then you can change it.");
+                      }}
+                      className="text-xs text-primary hover:text-primary/80 font-medium transition-colors"
+                    >
+                      Need to change password?
+                    </button>
                   </div>
                   <div className="relative">
                     <input
@@ -80,11 +97,11 @@ export default function LoginPage() {
               </div>
 
               {error && (
-                <div className="bg-destructive/10 border border-destructive/20 p-3 flex items-start gap-3">
-                  <svg className="w-5 h-5 text-destructive flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <div className={`${changePasswordMode ? 'bg-primary/10 border-primary/20' : 'bg-destructive/10 border-destructive/20'} border p-3 flex items-start gap-3`}>
+                  <svg className={`w-5 h-5 ${changePasswordMode ? 'text-primary' : 'text-destructive'} flex-shrink-0 mt-0.5`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={changePasswordMode ? "M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" : "M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"} />
                   </svg>
-                  <p className="text-sm text-destructive font-medium">{error}</p>
+                  <p className={`text-sm ${changePasswordMode ? 'text-primary' : 'text-destructive'} font-medium`}>{error}</p>
                 </div>
               )}
 
@@ -115,6 +132,21 @@ export default function LoginPage() {
           </div>
         </div>
       </div>
+
+      {showChangePasswordModal && (
+        <ChangePasswordModal
+          onClose={() => {
+            setShowChangePasswordModal(false);
+            setChangePasswordMode(false);
+          }}
+          onSuccess={() => {
+            setShowChangePasswordModal(false);
+            setChangePasswordMode(false);
+            setError("");
+            alert("Password changed successfully!");
+          }}
+        />
+      )}
     </div>
   );
 }

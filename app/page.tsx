@@ -12,6 +12,7 @@ import ContributionBreakdownChart from "@/components/ContributionBreakdownChart"
 import VelocityChart from "@/components/VelocityChart";
 import WhatIfCalculator from "@/components/WhatIfCalculator";
 import GithubContributionGraph from "@/components/GithubContributionGraph";
+import ChangePasswordModal from "@/components/ChangePasswordModal";
 import { useRouter } from "next/navigation";
 import { RecordModel } from "pocketbase";
 
@@ -49,6 +50,7 @@ export default function Home() {
   const [showTimeModal, setShowTimeModal] = useState(false);
   const [showMoneyModal, setShowMoneyModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
+  const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   
@@ -514,6 +516,21 @@ export default function Home() {
                             </div>
                         </div>
                         <button
+                        onClick={() => router.push("/settings")}
+                        className="block w-full text-left px-4 py-2 text-sm text-foreground hover:bg-muted transition-colors"
+                        >
+                        Settings
+                        </button>
+                        <button
+                        onClick={() => {
+                          setIsUserMenuOpen(false);
+                          setShowChangePasswordModal(true);
+                        }}
+                        className="block w-full text-left px-4 py-2 text-sm text-foreground hover:bg-muted transition-colors"
+                        >
+                        Change Password
+                        </button>
+                        <button
                         onClick={logout}
                         className="block w-full text-left px-4 py-2 text-sm text-destructive hover:bg-muted transition-colors"
                         >
@@ -679,6 +696,15 @@ export default function Home() {
         <ContributionImport
           onClose={() => setShowImportModal(false)}
           onSuccess={fetchData}
+        />
+      )}
+
+      {showChangePasswordModal && (
+        <ChangePasswordModal
+          onClose={() => setShowChangePasswordModal(false)}
+          onSuccess={() => {
+            alert("Password changed successfully!");
+          }}
         />
       )}
     </div>
