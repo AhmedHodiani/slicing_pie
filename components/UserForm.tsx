@@ -82,13 +82,6 @@ export default function UserForm({ user, onClose, onSuccess }: UserFormProps) {
         formData.append("password", password);
         formData.append("passwordConfirm", passwordConfirm);
         formData.append("emailVisibility", "true");
-      } else if (password) {
-        // Allow password update if provided during edit
-        if (password !== passwordConfirm) {
-          throw new Error("Passwords do not match");
-        }
-        formData.append("password", password);
-        formData.append("passwordConfirm", passwordConfirm);
       }
 
       if (isEdit) {
@@ -180,30 +173,7 @@ export default function UserForm({ user, onClose, onSuccess }: UserFormProps) {
               </>
             )}
 
-            {isEdit && (
-              <div>
-                  <label className="block text-sm font-medium text-foreground">New Password (Optional)</label>
-                  <input
-                    type="password"
-                    minLength={8}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Leave blank to keep current"
-                    className="mt-1 block w-full border border-input bg-background px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary sm:text-sm"
-                  />
-                  {password && (
-                    <input
-                      type="password"
-                      required
-                      minLength={8}
-                      value={passwordConfirm}
-                      onChange={(e) => setPasswordConfirm(e.target.value)}
-                      placeholder="Confirm new password"
-                      className="mt-2 block w-full border border-input bg-background px-3 py-2 text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary sm:text-sm"
-                    />
-                  )}
-              </div>
-            )}
+
 
             <div>
               <label className="block text-sm font-medium text-foreground">Role</label>

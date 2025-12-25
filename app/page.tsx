@@ -516,12 +516,6 @@ export default function Home() {
                             </div>
                         </div>
                         <button
-                        onClick={() => router.push("/settings")}
-                        className="block w-full text-left px-4 py-2 text-sm text-foreground hover:bg-muted transition-colors"
-                        >
-                        Settings
-                        </button>
-                        <button
                         onClick={() => {
                           setIsUserMenuOpen(false);
                           setShowChangePasswordModal(true);
