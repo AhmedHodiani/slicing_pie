@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 // Simple in-memory rate limiter
 const rateLimit = new Map<string, { count: number; lastReset: number }>();
 const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
-const MAX_REQUESTS = 300; // 300 requests per minute per IP (generous for app usage)
+const MAX_REQUESTS = 200; // 200 requests per minute per IP (generous for app usage)
 
 function checkRateLimit(ip: string) {
   const now = Date.now();
