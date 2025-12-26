@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useMemo } from "react";
 import { useAuth } from "@/components/AuthProvider";
+import packageJson from "../package.json";
 import { useTheme } from "@/components/ThemeProvider";
 import pb from "@/lib/pocketbase";
 import ContributionForm from "@/components/ContributionForm";
@@ -295,7 +296,7 @@ export default function Home() {
             <div className="flex items-center gap-2">
                 <h1 className="text-xl font-bold text-foreground tracking-tight">Smart Gov Project 201</h1>
                 <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-semibold border border-primary/20">
-                  v0.1.0
+                  v{packageJson.version}
                 </span>
             </div>
             <button 
