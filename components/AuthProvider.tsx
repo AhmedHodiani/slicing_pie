@@ -42,6 +42,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
+  // Update last_active timestamp periodically
+  useEffect(() => {
+    if (!user?.id) return;
+
+    const updateLastActive = async () => {
+      try {
+        await pb.collection("users").update(user.id, {
+          last_active: new Date().toISOString(),
+        });
+      } catch (err) {
+        console.error("Failed to update last_active:", err);
+      }
+    };
+
+    // Update immediately on mount
+    updateLastActive();
+
+    // Update every 60 seconds
+    const interval = setInterval(updateLastActive, 60000);
+
+    return () => clearInterval(interval);
+  }, [user?.id]);
+
   const login = async (email: string, pass: string) => {
     await pb.collection("users").authWithPassword(email, pass);
     router.push("/");

@@ -18,6 +18,7 @@ import { useRouter } from "next/navigation";
 import { RecordModel } from "pocketbase";
 
 import Avatar from "@/components/avataaars-lib";
+import ActivityStatus from "@/components/ActivityStatus";
 
 interface Contribution extends RecordModel {
   user: string;
@@ -82,6 +83,23 @@ export default function Home() {
 
   useEffect(() => {
     fetchData();
+  }, [user]);
+
+  // Refetch users periodically to update last_active status
+  useEffect(() => {
+    if (!user) return;
+
+    const interval = setInterval(async () => {
+      try {
+        const usersRes = await pb.collection("users").getFullList({ sort: "-created" });
+        setUsers(usersRes);
+      } catch (err: any) {
+        if (err.isAbort) return;
+        console.error("Error fetching users:", err);
+      }
+    }, 60000); // Update every minute
+
+    return () => clearInterval(interval);
   }, [user]);
 
   // Derived State
@@ -344,24 +362,30 @@ export default function Home() {
                                 : "hover:bg-muted text-foreground"
                         }`}
                     >
-                        <div className="w-12 h-14 overflow-hidden flex-shrink-0 flex items-center justify-center">
-                            {u.avatar_options ? (
-                                <Avatar
-                                    // style={{ width: '100%', height: '100%' }}
-                                    avatarStyle="Circle"
-                                    {...u.avatar_options}
-                                />
-                            ) : u.avatar ? (
-                                <img
-                                    src={pb.files.getUrl(u, u.avatar)}
-                                    alt={u.name}
-                                    className="h-full w-full object-cover"
-                                />
-                            ) : (
-                                <div className="text-xs font-bold text-muted-foreground">
-                                    {u.name?.charAt(0).toUpperCase() || "?"}
-                                </div>
-                            )}
+                        <div className="relative w-12 h-14 flex-shrink-0 flex items-center justify-center">
+                            <div className="w-full h-full overflow-hidden flex items-center justify-center">
+                                {u.avatar_options ? (
+                                    <Avatar
+                                        // style={{ width: '100%', height: '100%' }}
+                                        avatarStyle="Circle"
+                                        {...u.avatar_options}
+                                    />
+                                ) : u.avatar ? (
+                                    <img
+                                        src={pb.files.getUrl(u, u.avatar)}
+                                        alt={u.name}
+                                        className="h-full w-full object-cover"
+                                    />
+                                ) : (
+                                    <div className="text-xs font-bold text-muted-foreground">
+                                        {u.name?.charAt(0).toUpperCase() || "?"}
+                                    </div>
+                                )}
+                            </div>
+                            {/* Activity Status Badge */}
+                            <div className="absolute bottom-0 right-0 translate-x-0.5 translate-y-0.5">
+                                <ActivityStatus lastActive={u.last_active} />
+                            </div>
                         </div>
                         <div className="text-left min-w-0 flex-1">
                             <div className="font-medium text-sm truncate">{u.name || u.email}</div>
