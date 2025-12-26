@@ -55,6 +55,7 @@ export default function Home() {
   const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [timeRange, setTimeRange] = useState<"this_week" | "last_week" | "this_month" | "last_month" | "this_year" | "all_time">("all_time");
   
   // Data State
   const [contributions, setContributions] = useState<Contribution[]>([]);
@@ -102,6 +103,54 @@ export default function Home() {
     return () => clearInterval(interval);
   }, [user]);
 
+  // Helper function to filter by time range
+  const filterByTimeRange = (contribs: Contribution[]) => {
+    if (timeRange === "all_time") return contribs;
+
+    const now = new Date();
+    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    
+    let startDate: Date;
+    
+    switch (timeRange) {
+      case "this_week":
+        const dayOfWeek = now.getDay();
+        startDate = new Date(startOfDay);
+        startDate.setDate(startDate.getDate() - dayOfWeek);
+        break;
+      case "last_week":
+        const lastWeekDay = now.getDay();
+        startDate = new Date(startOfDay);
+        startDate.setDate(startDate.getDate() - lastWeekDay - 7);
+        const endDate = new Date(startDate);
+        endDate.setDate(endDate.getDate() + 7);
+        return contribs.filter(c => {
+          const contribDate = new Date(c.date || c.created);
+          return contribDate >= startDate && contribDate < endDate;
+        });
+      case "this_month":
+        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+        break;
+      case "last_month":
+        startDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        return contribs.filter(c => {
+          const contribDate = new Date(c.date || c.created);
+          return contribDate >= startDate && contribDate < endOfLastMonth;
+        });
+      case "this_year":
+        startDate = new Date(now.getFullYear(), 0, 1);
+        break;
+      default:
+        return contribs;
+    }
+    
+    return contribs.filter(c => {
+      const contribDate = new Date(c.date || c.created);
+      return contribDate >= startDate;
+    });
+  };
+
   // Derived State
   const filteredContributions = useMemo(() => {
     if (selectedUserId === "ALL") return contributions;
@@ -111,6 +160,21 @@ export default function Home() {
   const globalTotalSlices = useMemo(() => {
     return contributions.reduce((acc, c) => acc + c.slices, 0);
   }, [contributions]);
+
+  // Calculate hours and money with time range filter (only for the third card)
+  const timeRangeStats = useMemo(() => {
+    if (selectedUserId === "ALL") return { hours: 0, money: 0 };
+    
+    const timeFilteredContribs = filterByTimeRange(filteredContributions);
+    const totalHours = timeFilteredContribs
+      .filter(c => c.multiplier === 2)
+      .reduce((acc, c) => acc + (c.slices / 2), 0);
+    const totalMoney = timeFilteredContribs
+      .filter(c => c.multiplier === 4)
+      .reduce((acc, c) => acc + (c.slices / 4), 0);
+    
+    return { hours: totalHours, money: totalMoney };
+  }, [filteredContributions, selectedUserId, timeRange]);
 
   const stats = useMemo(() => {
     const totalSlices = filteredContributions.reduce((acc, c) => acc + c.slices, 0);
@@ -142,15 +206,14 @@ export default function Home() {
         };
     } else {
         // User View
-        const selectedUser = users.find(u => u.id === selectedUserId);
         const userSlices = filteredContributions.reduce((acc, c) => acc + c.slices, 0);
         return {
             label1: "Total Slices",
             value1: userSlices.toLocaleString(),
             label2: "Equity Share",
             value2: globalTotalSlices > 0 ? ((userSlices / globalTotalSlices) * 100).toFixed(2) + "%" : "0%",
-            label3: "Hourly Rate",
-            value3: selectedUser?.hourly_rate ? `JOD ${selectedUser.hourly_rate}` : "-"
+            label3: "Contributions",
+            value3: "" // Will be handled separately in the card
         };
     }
   }, [filteredContributions, contributions, selectedUserId, user, users, globalTotalSlices]);
@@ -642,8 +705,37 @@ export default function Home() {
                 <dd className="mt-2 text-3xl font-bold text-primary">{stats.value2}</dd>
             </div>
             <div className="rounded-lg border border-border bg-card p-6 shadow-card">
-                <dt className="text-sm font-medium text-muted-foreground">{stats.label3}</dt>
-                <dd className="mt-2 text-3xl font-bold text-foreground">{stats.value3}</dd>
+                {selectedUserId !== "ALL" ? (
+                  <div className="grid grid-cols-[2fr_5fr] gap-4 relative">
+                    <div className="pr-2">
+                      <dt className="text-sm font-medium text-muted-foreground">Total Hours</dt>
+                      <dd className="mt-2 text-3xl font-bold text-foreground">{timeRangeStats.hours.toFixed(1)}</dd>
+                    </div>
+                    <div className="border-l border-border pl-12">
+                      <dt className="text-sm font-medium text-muted-foreground">Total Money</dt>
+                      <dd className="mt-2 text-3xl font-bold text-foreground">JOD {timeRangeStats.money.toFixed(2)}</dd>
+                    </div>
+                    <div className="absolute -top-6 -right-6">
+                      <select
+                        value={timeRange}
+                        onChange={(e) => setTimeRange(e.target.value as any)}
+                        className="text-xs bg-muted border border-border px-2 py-1.5 text-foreground focus:outline-none focus:ring-2 focus:ring-primary h-fit"
+                      >
+                        <option value="all_time">All Time</option>
+                        <option value="this_week">This Week</option>
+                        <option value="last_week">Last Week</option>
+                        <option value="this_month">This Month</option>
+                        <option value="last_month">Last Month</option>
+                        <option value="this_year">This Year</option>
+                      </select>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <dt className="text-sm font-medium text-muted-foreground">{stats.label3}</dt>
+                    <dd className="mt-2 text-3xl font-bold text-foreground">{stats.value3}</dd>
+                  </>
+                )}
             </div>
             </div>
 

@@ -1,6 +1,7 @@
 {
   "name": "slicing_pie",
-  "version": "0.3.3",
+  "description": "The only fair way to split equity in a startup.",
+  "version": "0.4.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
