@@ -37,7 +37,7 @@ export default function LoginPage() {
         <div className="bg-card border border-border shadow-elegant">
           <div className="p-8 sm:p-10">
             <div className="text-center mb-8">
-              <h1 className="text-2xl font-bold tracking-tight text-foreground uppercase">Smart Gov Project 201</h1>
+              <h1 className="text-2xl font-bold tracking-tight text-foreground uppercase">Company Name</h1>
               <p className="mt-2 text-sm text-muted-foreground">
                 Slicing Pie Equity Calculator
               </p>
@@ -127,7 +127,7 @@ export default function LoginPage() {
           
           <div className="bg-muted/30 px-8 py-4 border-t border-border text-center">
             <p className="text-xs text-muted-foreground">
-              Protected by Smart Gov Project 201 Security
+              Protected by Company Name Security
             </p>
           </div>
         </div>
