@@ -313,7 +313,7 @@ export default function Home() {
   const contributionGraphData = useMemo(() => {
     const dataToProcess = selectedUserId === "ALL" ? contributions : filteredContributions;
     
-    const dailyMap = new Map<string, number>();
+    const dailyMap = new Map<string, { slices: number; hours: number; money: number }>();
     let maxSlices = 0;
     
     dataToProcess.forEach(c => {
@@ -321,15 +321,21 @@ export default function Home() {
         // Use local date string (YYYY-MM-DD) to avoid timezone shifts
         const dateStr = c.date || c.created;
         const date = new Date(dateStr).toLocaleDateString('en-CA');
-        const current = dailyMap.get(date) || 0;
-        const newVal = current + c.slices;
-        dailyMap.set(date, newVal);
-        if (newVal > maxSlices) maxSlices = newVal;
+        const current = dailyMap.get(date) || { slices: 0, hours: 0, money: 0 };
+        const newSlices = current.slices + c.slices;
+        const hours = c.multiplier === 2 ? c.slices / 2 : 0;
+        const money = c.multiplier === 4 ? c.slices / 4 : 0;
+        dailyMap.set(date, {
+            slices: newSlices,
+            hours: current.hours + hours,
+            money: current.money + money
+        });
+        if (newSlices > maxSlices) maxSlices = newSlices;
     });
 
-    const result: { [year: string]: { date: string; done: number; value: number }[] } = {};
+    const result: { [year: string]: { date: string; done: number; value: number; hours: number; money: number }[] } = {};
 
-    dailyMap.forEach((slices, date) => {
+    dailyMap.forEach((data, date) => {
         const year = date.split('-')[0];
         if (!result[year]) {
             result[year] = [];
@@ -338,11 +344,11 @@ export default function Home() {
         // Normalize to 0-10 scale
         // If slices > 0, ensure at least 1
         let normalized = 0;
-        if (maxSlices > 0 && slices > 0) {
-            normalized = Math.ceil((slices / maxSlices) * 8);
+        if (maxSlices > 0 && data.slices > 0) {
+            normalized = Math.ceil((data.slices / maxSlices) * 8);
         }
 
-        result[year].push({ date, done: normalized, value: slices });
+        result[year].push({ date, done: normalized, value: data.slices, hours: data.hours, money: data.money });
     });
 
     // Sort data by date ascending for each year
